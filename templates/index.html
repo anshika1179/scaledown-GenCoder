@@ -1,0 +1,3462 @@
+&#65279;
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>NCERT History AI Tutor | Class 10</title>
+
+  <meta name="description"
+    content="AI-powered CBSE Class 10 History tutor &mdash; India and the Contemporary World II. Instant, textbook-accurate answers." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* --------------------
+
+     RESET & TOKENS
+
+  -------------------- */
+
+    *,
+
+    *::before,
+
+    *::after {
+
+      box-sizing: border-box;
+
+      margin: 0;
+
+      padding: 0;
+
+    }
+
+    :root {
+      --p: #4c1d95;
+      --p2: #5b21b6;
+      --p3: #6d28d9;
+      --p-glow: rgba(76, 29, 149, 0.28);
+      --p-dim: rgba(76, 29, 149, .15);
+      --bg0: #f5f3ff;
+      --bg1: #ede9ff;
+      --bg2: #e2deff;
+      --bg3: #d5cfff;
+      --glass: rgba(237, 233, 255, .88);
+      --border: rgba(124, 92, 252, .28);
+      --border2: rgba(0, 0, 0, .20);
+      --t1: #0a081a;
+      --t2: #1e1b3a;
+      --t3: #2d2948;
+
+      --green: #34d399;
+
+      --pink: #f472b6;
+
+      --cyan: #22d3ee;
+
+      --sw: 300px;
+
+      --r1: 20px;
+
+      --r2: 14px;
+
+      --r3: 8px;
+
+    }
+
+    html,
+
+    body {
+
+      height: 100%;
+
+      overflow: hidden;
+
+      background: var(--bg0);
+
+      color: var(--t1);
+
+      font-family: 'Inter', sans-serif;
+
+    }
+
+    ::-webkit-scrollbar {
+
+      width: 4px;
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: transparent;
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: var(--border);
+
+      border-radius: 2px;
+
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+
+      background: var(--p);
+
+    }
+
+    /* --------------------
+
+     BACKGROUND &mdash; Photo + blur + dark overlay
+
+  -------------------- */
+
+    /* The actual photo layer */
+
+    .bg-photo {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 0;
+
+      background: url('/static/bg.png') center center / cover no-repeat;
+
+      filter: blur(6px) brightness(.72) saturate(.85);
+
+      transform: scale(1.06);
+
+      /* hides blur edges */
+
+      pointer-events: none;
+
+    }
+
+    /* Purple-tinted dark gradient overlay so glassmorphism pops */
+
+    .bg-overlay {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 0;
+
+      background:
+
+        linear-gradient(160deg, rgba(230,224,255,.78) 0%, rgba(210,205,255,.62) 100%);
+
+      pointer-events: none;
+
+    }
+
+    /* Dot grid texture on top */
+
+    .dot-grid {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 0;
+
+      background-image: radial-gradient(circle, rgba(124, 92, 252, 0.22) 1px, transparent 1px);
+
+      background-size: 32px 32px;
+
+      opacity: 0.3;
+
+      pointer-events: none;
+
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+
+    }
+
+    /* --------------------
+
+     LAYOUT SHELL
+
+  -------------------- */
+
+    .shell {
+
+      position: relative;
+
+      z-index: 1;
+
+      display: flex;
+
+      height: 100vh;
+
+      overflow: hidden;
+
+    }
+
+    /* --------------------
+
+     SIDEBAR
+
+  -------------------- */
+
+    .sidebar {
+
+      width: var(--sw);
+
+      min-width: var(--sw);
+
+      background: var(--glass);
+
+      backdrop-filter: blur(24px) saturate(160%);
+
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+
+      border-right: 1px solid var(--border2);
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow-y: auto;
+
+      overflow-x: hidden;
+
+      padding-bottom: 1.5rem;
+
+      position: relative;
+
+    }
+
+    /* top glow ring in sidebar */
+
+    .sidebar::before {
+
+      content: '';
+
+      position: absolute;
+
+      top: -80px;
+
+      left: -80px;
+
+      width: 260px;
+
+      height: 260px;
+
+      background: radial-gradient(circle, rgba(124, 92, 252, 0.3) 0%, transparent 70%);
+
+      pointer-events: none;
+
+    }
+
+    /* Logo */
+
+    .logo {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.75rem;
+
+      padding: 1.6rem 1.4rem 1.2rem;
+
+      text-decoration: none;
+
+      border-bottom: 1px solid var(--border2);
+
+      margin-bottom: 0.2rem;
+
+    }
+
+    .logo-icon-wrap {
+
+      width: 42px;
+
+      height: 42px;
+
+      border-radius: 12px;
+
+      flex-shrink: 0;
+
+      background: linear-gradient(135deg, var(--p), var(--p2));
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 1.3rem;
+
+      box-shadow: 0 0 20px var(--p-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+    }
+
+    .logo-text {
+
+      line-height: 1.2;
+
+    }
+
+    .logo-name {
+
+      font-family: 'Outfit', sans-serif;
+
+      font-size: 1rem;
+
+      font-weight: 800;
+
+      background: linear-gradient(135deg, #f0eeff, var(--p3));
+
+      -webkit-background-clip: text;
+
+      -webkit-text-fill-color: transparent;
+
+      background-clip: text;
+
+    }
+
+    .logo-sub {
+
+      font-size: 0.7rem;
+
+      color: var(--t3);
+
+      font-weight: 400;
+
+      letter-spacing: 0.5px;
+
+    }
+
+    /* Section label */
+
+    .s-label {
+
+      font-size: 0.68rem;
+
+      font-weight: 700;
+
+      color: var(--t3);
+
+      text-transform: uppercase;
+
+      letter-spacing: 1.4px;
+
+      padding: 1rem 1.4rem 0.5rem;
+
+    }
+
+    /* Stats */
+
+    .stats-row {
+
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: 0.6rem;
+
+      padding: 0 1rem 0.3rem;
+
+    }
+
+    .stat-card {
+
+      position: relative;
+
+      overflow: hidden;
+
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.14), rgba(167, 139, 250, 0.06));
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--r2);
+
+      padding: 0.9rem 0.7rem;
+
+      text-align: center;
+
+      transition: transform 0.25s, box-shadow 0.25s;
+
+      cursor: default;
+
+    }
+
+    .stat-card::before {
+
+      content: '';
+
+      position: absolute;
+
+      top: 0;
+
+      left: -100%;
+
+      width: 60%;
+
+      height: 100%;
+
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+
+      transition: left 0.5s;
+
+    }
+
+    .stat-card:hover::before {
+
+      left: 150%;
+
+    }
+
+    .stat-card:hover {
+
+      transform: translateY(-3px);
+
+      box-shadow: 0 8px 24px var(--p-glow);
+
+    }
+
+    .stat-number {
+
+      font-family: 'Outfit', sans-serif;
+
+      font-size: 1.7rem;
+
+      font-weight: 800;
+
+      color: var(--p2);
+
+      line-height: 1;
+
+    }
+
+    .stat-label {
+
+      font-size: 0.68rem;
+
+      color: var(--t3);
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
+
+      margin-top: 0.3rem;
+
+    }
+
+    /* Chapter pills */
+
+    .ch-list {
+
+      padding: 0 1rem 0.5rem;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 0.3rem;
+
+    }
+
+    .ch-pill {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.6rem;
+
+      background: rgba(255, 255, 255, 0.03);
+
+      border: 1px solid var(--border2);
+
+      border-radius: var(--r3);
+
+      padding: 0.55rem 0.8rem;
+
+      font-size: 0.8rem;
+
+      color: var(--t2);
+
+      cursor: default;
+
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+
+    }
+
+    .ch-pill:hover {
+
+      background: var(--p-dim);
+
+      border-color: var(--border);
+
+      color: var(--t1);
+
+      transform: translateX(5px);
+
+    }
+
+    .ch-num {
+
+      font-size: 0.68rem;
+
+      font-weight: 700;
+
+      color: var(--p2);
+
+      background: rgba(124, 92, 252, 0.2);
+
+      border-radius: 5px;
+
+      padding: 0.1rem 0.42rem;
+
+      min-width: 28px;
+
+      text-align: center;
+
+      flex-shrink: 0;
+
+    }
+
+    /* divider */
+
+    .sdiv {
+
+      height: 1px;
+
+      margin: 0.4rem 1rem 0.1rem;
+
+      background: linear-gradient(90deg, transparent, var(--border2), transparent);
+
+    }
+
+    /* Info box */
+
+    .info-box {
+
+      margin: 0.3rem 1rem 0.5rem;
+
+      background: rgba(124, 92, 252, 0.06);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--r2);
+
+      padding: 0.85rem 1rem;
+
+      font-size: 0.78rem;
+
+      color: var(--t2);
+
+      line-height: 1.6;
+
+    }
+
+    .info-box strong {
+
+      color: var(--p2);
+
+      font-weight: 600;
+
+    }
+
+    /* Tips */
+
+    .tips {
+
+      margin: 0 1rem;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 0.38rem;
+
+    }
+
+    .tip {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 0.5rem;
+
+      font-size: 0.78rem;
+
+      color: var(--t2);
+
+      line-height: 1.45;
+
+    }
+
+    .tip-arrow {
+
+      color: var(--p2);
+
+      font-size: 0.75rem;
+
+      margin-top: 1px;
+
+      flex-shrink: 0;
+
+      font-weight: 700;
+
+    }
+
+    /* --------------------
+
+     MAIN AREA
+
+  -------------------- */
+
+    .main {
+
+      flex: 1;
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow: hidden;
+
+      position: relative;
+
+    }
+
+    /* --------------------
+
+     HERO
+
+  -------------------- */
+
+    .hero {
+
+      text-align: center;
+
+      padding: 2rem 2rem 1.4rem;
+
+      flex-shrink: 0;
+
+      position: relative;
+
+    }
+
+    /* glowing ring behind icon */
+
+    .hero-ring {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      position: relative;
+
+      margin-bottom: 1rem;
+
+    }
+
+    .hero-ring::before {
+
+      content: '';
+
+      position: absolute;
+
+      inset: -8px;
+
+      border-radius: 50%;
+
+      background: conic-gradient(from 0deg, var(--p), var(--cyan), var(--pink), var(--p2), var(--p));
+
+      animation: spin-ring 4s linear infinite;
+
+      z-index: 0;
+
+      filter: blur(2px);
+
+      opacity: 0.7;
+
+    }
+
+    /* --------------------
+
+     SUGGESTED QUESTIONS ACCORDION
+
+  -------------------- */
+
+    .sq-list {
+
+      padding: 0 1rem 0.3rem;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 0.3rem;
+
+    }
+
+    .sq-item {
+
+      border-radius: var(--r3);
+
+      overflow: hidden;
+
+    }
+
+    .sq-header {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      padding: 0.52rem 0.8rem;
+
+      background: rgba(124, 92, 252, 0.08);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--r3);
+
+      cursor: pointer;
+
+      font-size: 0.75rem;
+
+      font-weight: 700;
+
+      color: var(--p3);
+
+      letter-spacing: 0.3px;
+
+      transition: background 0.2s, border-color 0.2s;
+
+      user-select: none;
+
+    }
+
+    .sq-header:hover {
+
+      background: rgba(124, 92, 252, 0.16);
+
+      border-color: rgba(124, 92, 252, 0.4);
+
+    }
+
+    .sq-header.open {
+
+      border-radius: var(--r3) var(--r3) 0 0;
+
+      border-bottom-color: transparent;
+
+      background: rgba(124, 92, 252, 0.14);
+
+    }
+
+    .sq-arrow {
+
+      font-size: 0.65rem;
+
+      transition: transform 0.25s;
+
+      flex-shrink: 0;
+
+    }
+
+    .sq-header.open .sq-arrow {
+
+      transform: rotate(180deg);
+
+    }
+
+    .sq-body {
+
+      display: none;
+
+      flex-direction: column;
+
+      gap: 0.25rem;
+
+      background: rgba(124, 92, 252, 0.05);
+
+      border: 1px solid rgba(124, 92, 252, 0.18);
+
+      border-top: none;
+
+      border-radius: 0 0 var(--r3) var(--r3);
+
+      padding: 0.4rem 0.6rem 0.55rem;
+
+    }
+
+    .sq-body.open {
+
+      display: flex;
+
+    }
+
+    .sq-chip {
+
+      font-size: 0.74rem;
+
+      color: var(--t2);
+
+      background: rgba(255, 255, 255, 0.03);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 6px;
+
+      padding: 0.38rem 0.65rem;
+
+      cursor: pointer;
+
+      line-height: 1.4;
+
+      transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.12s;
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 0.4rem;
+
+    }
+
+    .sq-chip::before {
+
+      content: '›';
+
+      color: var(--p2);
+
+      font-weight: 700;
+
+      flex-shrink: 0;
+
+      margin-top: 0.05rem;
+
+    }
+
+    .sq-chip:hover {
+
+      background: rgba(124, 92, 252, 0.14);
+
+      border-color: rgba(124, 92, 252, 0.35);
+
+      color: var(--t1);
+
+      transform: translateX(3px);
+
+    }
+
+    .hero-ring::after {
+
+      content: '';
+
+      position: absolute;
+
+      inset: -2px;
+
+      border-radius: 50%;
+
+      /* semi-transparent so photo shows through slightly */
+
+      background: rgba(9, 9, 20, 0.88);
+
+      z-index: 1;
+
+    }
+
+    @keyframes spin-ring {
+
+      to {
+
+        transform: rotate(360deg);
+
+      }
+
+    }
+
+    .hero-icon-inner {
+
+      position: relative;
+
+      z-index: 2;
+
+      width: 72px;
+
+      height: 72px;
+
+      border-radius: 50%;
+
+      background: linear-gradient(135deg, #1a1040, #2d1f6e);
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 2rem;
+
+      animation: float 3.5s ease-in-out infinite;
+
+      box-shadow: 0 0 30px var(--p-glow);
+
+      border: 1px solid rgba(124, 92, 252, 0.3);
+
+    }
+
+    @keyframes float {
+
+      0%,
+
+      100% {
+
+        transform: translateY(0);
+
+      }
+
+      50% {
+
+        transform: translateY(-10px);
+
+      }
+
+    }
+
+    .hero-title {
+
+      font-family: 'Outfit', sans-serif;
+
+      font-size: 2.4rem;
+
+      font-weight: 900;
+
+      letter-spacing: -1px;
+
+      background: linear-gradient(135deg, #ffffff 0%, var(--p3) 40%, var(--p2) 70%, #a5f3fc 100%);
+
+      -webkit-background-clip: text;
+
+      -webkit-text-fill-color: transparent;
+
+      background-clip: text;
+
+      margin-bottom: 0.45rem;
+
+      text-shadow: none;
+
+    }
+
+    .hero-sub {
+
+      font-size: 0.88rem;
+
+      color: var(--t2);
+
+      max-width: 480px;
+
+      margin: 0 auto;
+
+      line-height: 1.65;
+
+      font-weight: 300;
+
+    }
+
+    .hero-sub em {
+
+      color: var(--p3);
+
+      font-style: normal;
+
+      font-weight: 500;
+
+    }
+
+    /* badge row */
+
+    .hero-badges {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 0.6rem;
+
+      margin-top: 0.9rem;
+
+      flex-wrap: wrap;
+
+    }
+
+    .badge {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 0.35rem;
+
+      font-size: 0.72rem;
+
+      font-weight: 600;
+
+      padding: 0.28rem 0.75rem;
+
+      border-radius: 999px;
+
+      border: 1px solid;
+
+      letter-spacing: 0.3px;
+
+    }
+
+    .badge-purple {
+
+      color: var(--p3);
+
+      border-color: rgba(124, 92, 252, 0.35);
+
+      background: rgba(124, 92, 252, 0.1);
+
+    }
+
+    .badge-green {
+
+      color: #6ee7b7;
+
+      border-color: rgba(52, 211, 153, 0.35);
+
+      background: rgba(52, 211, 153, 0.08);
+
+    }
+
+    .badge-cyan {
+
+      color: #67e8f9;
+
+      border-color: rgba(34, 211, 238, 0.35);
+
+      background: rgba(34, 211, 238, 0.08);
+
+    }
+
+    .badge-dot {
+
+      width: 5px;
+
+      height: 5px;
+
+      border-radius: 50%;
+
+      background: currentColor;
+
+      animation: blink 1.8s ease infinite;
+
+    }
+
+    @keyframes blink {
+
+      0%,
+
+      100% {
+
+        opacity: 1
+      }
+
+      50% {
+
+        opacity: 0.3
+      }
+
+    }
+
+    /* --------------------
+
+     CHAT WINDOW
+
+  -------------------- */
+
+    .chat-window {
+
+      flex: 1;
+
+      overflow-y: auto;
+
+      padding: 0.5rem 2.2rem 1rem;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 0;
+
+    }
+
+    /* --------------------
+
+     WELCOME CARDS
+
+  -------------------- */
+
+    .welcome-grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(2, 1fr);
+
+      gap: 0.85rem;
+
+      margin: 0.3rem 0 1.4rem;
+
+      transition: opacity 0.5s ease, transform 0.5s ease, height 0.4s ease, margin 0.4s ease;
+
+    }
+
+    .welcome-grid.hidden {
+
+      opacity: 0;
+
+      transform: translateY(-16px) scale(0.97);
+
+      pointer-events: none;
+
+      height: 0;
+
+      overflow: hidden;
+
+      margin: 0;
+
+    }
+
+    /* gradient-border card trick */
+
+    .wc-wrap {
+
+      position: relative;
+
+      border-radius: var(--r1);
+
+      padding: 1px;
+
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.4), rgba(34, 211, 238, 0.2), rgba(244, 114, 182, 0.2));
+
+      transition: opacity 0.3s;
+
+    }
+
+    .wc-wrap::before {
+
+      content: '';
+
+      position: absolute;
+
+      inset: -1px;
+
+      border-radius: var(--r1);
+
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.5), rgba(34, 211, 238, 0.3), rgba(244, 114, 182, 0.3));
+
+      opacity: 0;
+
+      transition: opacity 0.3s;
+
+      z-index: -1;
+
+      filter: blur(6px);
+
+    }
+
+    .wc-wrap:hover::before {
+
+      opacity: 1;
+
+    }
+
+    .wc {
+
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+
+      border-radius: calc(var(--r1) - 1px);
+
+      padding: 1.3rem 1.2rem;
+
+      cursor: pointer;
+
+      height: 100%;
+
+      transition: transform 0.25s, box-shadow 0.25s;
+
+      position: relative;
+
+      overflow: hidden;
+
+    }
+
+    .wc::after {
+
+      content: '';
+
+      position: absolute;
+
+      top: -40%;
+
+      right: -20%;
+
+      width: 100px;
+
+      height: 100px;
+
+      background: radial-gradient(circle, rgba(124, 92, 252, 0.2) 0%, transparent 70%);
+
+      border-radius: 50%;
+
+      opacity: 0;
+
+      transition: opacity 0.3s;
+
+    }
+
+    .wc:hover {
+
+      transform: translateY(-5px);
+
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+    }
+
+    .wc:hover::after {
+
+      opacity: 1;
+
+    }
+
+    .wc-icon {
+
+      font-size: 1.6rem;
+
+      margin-bottom: 0.55rem;
+
+    }
+
+    .wc-title {
+
+      font-size: 0.9rem;
+
+      font-weight: 700;
+
+      color: var(--t1);
+
+      margin-bottom: 0.3rem;
+
+    }
+
+    .wc-desc {
+
+      font-size: 0.77rem;
+
+      color: var(--t2);
+
+      line-height: 1.5;
+
+    }
+
+    /* --------------------
+
+     MESSAGES
+
+  -------------------- */
+
+    .msg-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 0.65rem;
+
+      margin-bottom: 0.9rem;
+
+      animation: msgIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    }
+
+    @keyframes msgIn {
+
+      from {
+
+        opacity: 0;
+
+        transform: translateY(22px) scale(0.97);
+
+      }
+
+      to {
+
+        opacity: 1;
+
+        transform: translateY(0) scale(1);
+
+      }
+
+    }
+
+    .msg-row {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 0.7rem;
+
+      max-width: 86%;
+
+    }
+
+    .msg-row.user {
+
+      align-self: flex-end;
+
+      flex-direction: row-reverse;
+
+    }
+
+    .msg-row.ai {
+
+      align-self: flex-start;
+
+    }
+
+    .av {
+
+      width: 36px;
+
+      height: 36px;
+
+      border-radius: 50%;
+
+      flex-shrink: 0;
+
+      margin-top: 2px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 1rem;
+
+    }
+
+    .av-user {
+
+      background: linear-gradient(135deg, var(--p), var(--p2));
+
+      box-shadow: 0 0 14px var(--p-glow), 0 0 0 2px rgba(124, 92, 252, 0.25);
+
+    }
+
+    .av-ai {
+
+      background: linear-gradient(135deg, #1b1b2c, #23233a);
+
+      border: 1px solid var(--border);
+
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+    }
+
+    .bubble {
+
+      padding: 1rem 1.2rem;
+
+      border-radius: var(--r1);
+
+      font-size: 0.88rem;
+
+      line-height: 1.75;
+
+      color: var(--t1);
+
+      position: relative;
+
+      transition: box-shadow 0.3s;
+
+    }
+
+    /* user bubble: gradient border */
+
+    .bubble-user {
+
+      background: linear-gradient(135deg, #d4c9ff, #c0b0ff);
+
+      border: 1px solid rgba(124, 92, 252, .4);
+
+      border-radius: var(--r1) var(--r1) var(--r3) var(--r1);
+
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    }
+
+    /* ai bubble: glass */
+
+    .bubble-ai {
+
+      background: rgba(237, 233, 255, .9);
+
+      backdrop-filter: blur(12px);
+
+      border: 1px solid var(--border2);
+
+      border-radius: var(--r1) var(--r1) var(--r1) var(--r3);
+
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    }
+
+    .bubble-user:hover {
+
+      box-shadow: 0 6px 28px rgba(124, 92, 252, 0.3);
+
+    }
+
+    .bubble-ai:hover {
+
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+
+    }
+
+    .bubble strong,
+
+    .bubble b {
+
+      color: var(--p3);
+
+      font-weight: 600;
+
+    }
+
+    .bubble em {
+
+      color: var(--green);
+
+      font-style: normal;
+
+    }
+
+    /* source row */
+
+    .sources {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 0.4rem;
+
+      margin-top: 0.8rem;
+
+      padding-top: 0.75rem;
+
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+    }
+
+    .src-label {
+
+      width: 100%;
+
+      font-size: 0.7rem;
+
+      color: var(--t3);
+
+      margin-bottom: 0.15rem;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.3rem;
+
+    }
+
+    .src-tag {
+
+      font-size: 0.7rem;
+
+      font-weight: 600;
+
+      color: var(--p3);
+
+      background: rgba(124, 92, 252, 0.12);
+
+      border: 1px solid rgba(124, 92, 252, 0.28);
+
+      border-radius: 6px;
+
+      padding: 0.18rem 0.6rem;
+
+      transition: background 0.2s;
+
+    }
+
+    .src-tag:hover {
+
+      background: rgba(124, 92, 252, 0.22);
+
+    }
+
+    /* --------------------
+
+     TYPING INDICATOR
+
+  -------------------- */
+
+    .typing-row {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 0.7rem;
+
+      align-self: flex-start;
+
+      animation: msgIn 0.35s both;
+
+      margin-bottom: 0.9rem;
+
+    }
+
+    .typing-bubble {
+
+      background: rgba(237, 233, 255, .9);
+
+      backdrop-filter: blur(12px);
+
+      border: 1px solid var(--border2);
+
+      border-radius: var(--r1) var(--r1) var(--r1) var(--r3);
+
+      padding: 0.85rem 1.1rem;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.45rem;
+
+    }
+
+    .typing-label {
+
+      font-size: 0.78rem;
+
+      color: var(--t3);
+
+    }
+
+    .dot-pulse {
+
+      width: 8px;
+
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: var(--p2);
+
+      animation: pulse-dot 1.3s cubic-bezier(.455, .03, .515, .955) infinite;
+
+    }
+
+    .dot-pulse:nth-child(2) {
+
+      animation-delay: .16s;
+
+      background: var(--cyan);
+
+    }
+
+    .dot-pulse:nth-child(3) {
+
+      animation-delay: .32s;
+
+      background: var(--pink);
+
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+
+      60%,
+
+      100% {
+
+        transform: scale(0.6);
+
+        opacity: 0.4;
+
+      }
+
+      30% {
+
+        transform: scale(1.2);
+
+        opacity: 1;
+
+      }
+
+    }
+
+    /* --------------------
+
+     INPUT BAR
+
+  -------------------- */
+
+    .input-area {
+
+      padding: 0.9rem 2.2rem 1.3rem;
+
+      flex-shrink: 0;
+
+      position: relative;
+
+    }
+
+    /* fade-up blur */
+
+    .input-area::before {
+
+      content: '';
+
+      position: absolute;
+
+      top: -50px;
+
+      left: 0;
+
+      right: 0;
+
+      height: 50px;
+
+      background: linear-gradient(to top, var(--bg0), transparent);
+
+      pointer-events: none;
+
+    }
+
+    /* gradient border input */
+
+    .input-ring {
+
+      position: relative;
+
+      border-radius: var(--r1);
+
+      padding: 1.5px;
+
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.5), rgba(34, 211, 238, 0.25), rgba(244, 114, 182, 0.2));
+
+      transition: opacity 0.3s;
+
+    }
+
+    .input-ring:focus-within {
+
+      background: linear-gradient(135deg, var(--p), var(--cyan), var(--pink));
+
+    }
+
+    /* outer glow */
+
+    .input-ring::before {
+
+      content: '';
+
+      position: absolute;
+
+      inset: -2px;
+
+      border-radius: calc(var(--r1) + 2px);
+
+      background: linear-gradient(135deg, var(--p), var(--cyan), var(--pink));
+
+      opacity: 0;
+
+      filter: blur(8px);
+
+      transition: opacity 0.4s;
+
+      z-index: -1;
+
+    }
+
+    .input-ring:focus-within::before {
+
+      opacity: 0.5;
+
+    }
+
+    .input-inner {
+
+      display: flex;
+
+      align-items: flex-end;
+
+      gap: 0.6rem;
+
+      background: var(--bg2);
+
+      border-radius: calc(var(--r1) - 1.5px);
+
+      padding: 0.75rem 0.75rem 0.75rem 1.2rem;
+
+    }
+
+    #questionInput {
+
+      flex: 1;
+
+      background: transparent;
+
+      border: none;
+
+      outline: none;
+
+      color: var(--t1);
+
+      font-family: 'Inter', sans-serif;
+
+      font-size: 0.9rem;
+
+      line-height: 1.5;
+
+      resize: none;
+
+      max-height: 140px;
+
+      overflow-y: auto;
+
+      padding: 0;
+
+    }
+
+    #questionInput::placeholder {
+
+      color: var(--t3);
+
+    }
+
+    #sendBtn {
+
+      width: 42px;
+
+      height: 42px;
+
+      border-radius: 12px;
+
+      border: none;
+
+      cursor: pointer;
+
+      flex-shrink: 0;
+
+      background: linear-gradient(135deg, var(--p), var(--p2));
+
+      color: #fff;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.2s;
+
+      box-shadow: 0 4px 16px var(--p-glow);
+
+      position: relative;
+
+      overflow: hidden;
+
+    }
+
+    #sendBtn::after {
+
+      content: '';
+
+      position: absolute;
+
+      inset: 0;
+
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+
+      opacity: 0;
+
+      transition: opacity 0.2s;
+
+    }
+
+    #sendBtn:hover:not(:disabled) {
+
+      transform: scale(1.1);
+
+      box-shadow: 0 8px 24px rgba(124, 92, 252, 0.5);
+
+    }
+
+    #sendBtn:hover:not(:disabled)::after {
+
+      opacity: 1;
+
+    }
+
+    #sendBtn:active:not(:disabled) {
+
+      transform: scale(0.96);
+
+    }
+
+    #sendBtn:disabled {
+
+      opacity: 0.4;
+
+      cursor: not-allowed;
+
+    }
+
+    #sendBtn svg {
+
+      width: 18px;
+
+      height: 18px;
+
+      position: relative;
+
+      z-index: 1;
+
+    }
+
+    .input-footer {
+
+      text-align: center;
+
+      font-size: 0.72rem;
+
+      color: var(--t3);
+
+      margin-top: 0.5rem;
+
+    }
+
+    kbd {
+
+      background: rgba(255, 255, 255, 0.06);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 5px;
+
+      padding: 1px 6px;
+
+      font-family: inherit;
+
+      font-size: inherit;
+
+    }
+
+    /* --------------------
+
+     TOAST
+
+  -------------------- */
+
+    .toast {
+
+      position: fixed;
+
+      bottom: 6rem;
+
+      left: 50%;
+
+      transform: translateX(-50%) translateY(16px) scale(0.96);
+
+      background: rgba(30, 10, 10, 0.9);
+
+      backdrop-filter: blur(12px);
+
+      border: 1px solid rgba(239, 68, 68, 0.35);
+
+      color: #fca5a5;
+
+      font-size: 0.82rem;
+
+      padding: 0.65rem 1.3rem;
+
+      border-radius: 12px;
+
+      opacity: 0;
+
+      transition: all 0.35s;
+
+      z-index: 200;
+
+      pointer-events: none;
+
+    }
+
+    .toast.show {
+
+      opacity: 1;
+
+      transform: translateX(-50%) translateY(0) scale(1);
+
+    }
+
+    /* --------------------
+
+     RESPONSIVE
+
+  -------------------- */
+
+    @media (max-width: 820px) {
+
+      .sidebar {
+
+        display: none;
+
+      }
+
+      .welcome-grid {
+
+        grid-template-columns: 1fr;
+
+      }
+
+      .hero-title {
+
+        font-size: 1.8rem;
+
+      }
+
+      .chat-window,
+
+      .input-area {
+
+        padding-inline: 1rem;
+
+      }
+
+    }
+
+    /* -------------------- TOPBAR (mobile hamburger + theme toggle) -------------------- */
+
+    .topbar {
+
+      display: none;
+
+      position: fixed;
+
+      top: 0;
+
+      left: 0;
+
+      right: 0;
+
+      z-index: 100;
+
+      height: 52px;
+
+      background: rgba(9, 9, 20, .9);
+
+      backdrop-filter: blur(16px);
+
+      border-bottom: 1px solid var(--border2);
+
+      align-items: center;
+
+      padding: 0 1rem;
+
+      gap: .8rem;
+
+    }
+
+    @media(max-width:820px) {
+
+      .topbar {
+
+        display: flex;
+
+      }
+
+      .sidebar {
+
+        position: fixed;
+
+        left: -100%;
+
+        top: 52px;
+
+        bottom: 0;
+
+        z-index: 99;
+
+        transition: left .3s;
+
+        display: flex !important;
+
+      }
+
+      .sidebar.open {
+
+        left: 0;
+
+      }
+
+      .shell {
+
+        padding-top: 52px;
+
+      }
+
+    }
+
+    .icon-btn {
+
+      background: none;
+
+      border: 1px solid var(--border2);
+
+      color: var(--t2);
+
+      border-radius: 8px;
+
+      width: 36px;
+
+      height: 36px;
+
+      cursor: pointer;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 1rem;
+
+      transition: background .2s, color .2s;
+
+      flex-shrink: 0;
+
+    }
+
+    .icon-btn:hover {
+
+      background: var(--p-dim);
+
+      color: var(--t1);
+
+    }
+
+    .topbar-title {
+
+      font-family: 'Outfit', sans-serif;
+
+      font-weight: 700;
+
+      font-size: .95rem;
+
+      background: linear-gradient(135deg, #fff, var(--p3));
+
+      -webkit-background-clip: text;
+
+      -webkit-text-fill-color: transparent;
+
+      background-clip: text;
+
+      flex: 1;
+
+    }
+
+    /* -------------------- LIGHT MODE -------------------- */
+
+    body.light {
+      --bg0: #f5f3ff;
+      --bg1: #ede9ff;
+      --bg2: #e2deff;
+      --bg3: #d5cfff;
+      --glass: rgba(237, 233, 255, .88);
+      --border: #7c5cfc;
+      --border2: rgba(0, 0, 0, .2);
+      --t1: #0a081a;
+      --t2: #1e1b3a;
+      --t3: #3b3561;
+      --p: #4c1d95;
+      --p2: #5b21b6;
+      --p3: #6d28d9;
+      --p-dim: rgba(124, 92, 252, .15);
+
+    }
+
+    body.light .bg-photo {
+
+      filter: blur(6px) brightness(.72) saturate(.85);
+
+    }
+
+    body.light .bg-overlay {
+
+      background: linear-gradient(160deg, rgba(230, 224, 255, .78) 0%, rgba(210, 205, 255, .62) 100%);
+
+    }
+
+    body.light .bubble-user {
+
+      background: linear-gradient(135deg, #d4c9ff, #c0b0ff);
+
+      border-color: rgba(124, 92, 252, .4);
+
+    }
+
+    body.light .bubble-ai {
+
+      background: rgba(237, 233, 255, .9);
+
+    }
+
+    /* -------------------- COPY BUTTON -------------------- */
+
+    .copy-btn {
+
+      position: absolute;
+
+      top: .5rem;
+
+      right: .5rem;
+
+      background: rgba(255, 255, 255, .07);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 6px;
+
+      color: var(--t3);
+
+      font-size: .7rem;
+
+      padding: .25rem .5rem;
+
+      cursor: pointer;
+
+      opacity: 0;
+
+      transition: opacity .2s, background .2s;
+
+    }
+
+    .bubble-ai:hover .copy-btn,
+
+    .bubble-ai:focus-within .copy-btn {
+
+      opacity: 1;
+
+    }
+
+    .copy-btn:hover {
+
+      background: var(--p-dim);
+
+      color: var(--p2);
+
+    }
+
+    /* -------------------- FOLLOW-UP CHIPS -------------------- */
+
+    .followup {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: .4rem;
+
+      margin-top: .75rem;
+
+      padding-top: .6rem;
+
+      border-top: 1px solid var(--border2);
+
+    }
+
+    .fu-chip {
+
+      font-size: .72rem;
+
+      padding: .3rem .65rem;
+
+      border: 1px solid var(--border);
+
+      border-radius: 999px;
+
+      color: var(--p3);
+
+      background: rgba(124, 92, 252, .08);
+
+      cursor: pointer;
+
+      transition: background .18s, color .18s, transform .12s;
+
+    }
+
+    .fu-chip:hover {
+
+      background: rgba(124, 92, 252, .2);
+
+      color: var(--t1);
+
+      transform: translateY(-2px);
+
+    }
+
+    /* -------------------- COST CARD -------------------- */
+
+    .cost-card {
+
+      margin: .3rem 1rem .5rem;
+
+      border: 1px solid rgba(52, 211, 153, .22);
+
+      border-radius: var(--r2);
+
+      padding: .7rem .9rem;
+
+      background: rgba(52, 211, 153, .06);
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: .3rem;
+
+    }
+
+    .cost-row {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      font-size: .75rem;
+
+    }
+
+    .cost-label {
+
+      color: var(--t3);
+
+    }
+
+    .cost-val {
+
+      font-weight: 700;
+
+      color: var(--green);
+
+      font-family: 'Outfit', sans-serif;
+
+    }
+
+    .cost-bar-wrap {
+
+      height: 4px;
+
+      background: var(--border2);
+
+      border-radius: 2px;
+
+      overflow: hidden;
+
+      margin-top: .2rem;
+
+    }
+
+    .cost-bar {
+
+      height: 100%;
+
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+
+      border-radius: 2px;
+
+      transition: width .5s;
+
+    }
+
+    /* -------------------- CHAPTER TRACKER -------------------- */
+
+    .tracker {
+
+      margin: .3rem 1rem .5rem;
+
+    }
+
+    .tracker-row {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      font-size: .72rem;
+
+      color: var(--t3);
+
+      margin-bottom: .3rem;
+
+    }
+
+    .tracker-bar-wrap {
+
+      height: 6px;
+
+      background: var(--border2);
+
+      border-radius: 3px;
+
+      overflow: hidden;
+
+    }
+
+    .tracker-bar {
+
+      height: 100%;
+
+      background: linear-gradient(90deg, var(--p), var(--cyan));
+
+      border-radius: 3px;
+
+      transition: width .5s;
+
+    }
+
+    .tracker-dots {
+
+      display: flex;
+
+      gap: .35rem;
+
+      margin-top: .4rem;
+
+    }
+
+    .tracker-dot {
+
+      width: 8px;
+
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: var(--border2);
+
+      transition: background .3s;
+
+      flex-shrink: 0;
+
+    }
+
+    .tracker-dot.visited {
+
+      background: linear-gradient(135deg, var(--p), var(--cyan));
+
+      box-shadow: 0 0 6px var(--p-glow);
+
+    }
+
+    /* -------------------- QUIZ BUTTON -------------------- */
+
+    .quiz-launch-btn {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: .5rem;
+
+      margin: .3rem 1rem .1rem;
+
+      background: linear-gradient(135deg, rgba(244, 114, 182, .15), rgba(124, 92, 252, .15));
+
+      border: 1px solid rgba(244, 114, 182, .3);
+
+      border-radius: var(--r2);
+
+      padding: .65rem;
+
+      font-size: .8rem;
+
+      font-weight: 700;
+
+      color: var(--pink);
+
+      cursor: pointer;
+
+      transition: background .2s, transform .15s;
+
+    }
+
+    .quiz-launch-btn:hover {
+
+      background: linear-gradient(135deg, rgba(244, 114, 182, .25), rgba(124, 92, 252, .25));
+
+      transform: translateY(-2px);
+
+    }
+
+    /* -------------------- QUIZ MODAL -------------------- */
+
+    .qz-backdrop {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 200;
+
+      background: rgba(0, 0, 0, .65);
+
+      backdrop-filter: blur(6px);
+
+      display: none;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 1.5rem;
+
+    }
+
+    .qz-backdrop.open {
+
+      display: flex;
+
+    }
+
+    .qz-modal {
+
+      background: var(--bg1);
+
+      border: 1px solid var(--border);
+
+      border-radius: 22px;
+
+      width: 100%;
+
+      max-width: 620px;
+
+      max-height: 85vh;
+
+      overflow-y: auto;
+
+      padding: 2rem;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 1.2rem;
+
+    }
+
+    .qz-header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+    }
+
+    .qz-title {
+
+      font-family: 'Outfit', sans-serif;
+
+      font-size: 1.2rem;
+
+      font-weight: 800;
+
+      background: linear-gradient(135deg, var(--pink), var(--p2));
+
+      -webkit-background-clip: text;
+
+      -webkit-text-fill-color: transparent;
+
+      background-clip: text;
+
+    }
+
+    .qz-close {
+
+      background: none;
+
+      border: none;
+
+      color: var(--t3);
+
+      font-size: 1.4rem;
+
+      cursor: pointer;
+
+      transition: color .2s;
+
+    }
+
+    .qz-close:hover {
+
+      color: var(--t1);
+
+    }
+
+    .qz-sel {
+
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: .5rem;
+
+    }
+
+    .qz-ch {
+
+      background: rgba(255, 255, 255, .04);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 10px;
+
+      padding: .65rem .8rem;
+
+      font-size: .8rem;
+
+      cursor: pointer;
+
+      color: var(--t2);
+
+      transition: background .2s, border-color .2s, color .2s;
+
+    }
+
+    .qz-ch:hover,
+
+    .qz-ch.active {
+
+      background: var(--p-dim);
+
+      border-color: var(--border);
+
+      color: var(--t1);
+
+    }
+
+    .qz-start {
+
+      width: 100%;
+
+      padding: .75rem;
+
+      border: none;
+
+      border-radius: 12px;
+
+      background: linear-gradient(135deg, var(--p), var(--p2));
+
+      color: #fff;
+
+      font-size: .9rem;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition: opacity .2s, transform .15s;
+
+    }
+
+    .qz-start:hover {
+
+      transform: translateY(-2px);
+
+      opacity: .9;
+
+    }
+
+    .qz-q {
+
+      background: rgba(255, 255, 255, .04);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 14px;
+
+      padding: 1rem 1.1rem;
+
+    }
+
+    .qz-q-text {
+
+      font-size: .88rem;
+
+      font-weight: 600;
+
+      margin-bottom: .75rem;
+
+      color: var(--t1);
+
+    }
+
+    .qz-opts {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: .4rem;
+
+    }
+
+    .qz-opt {
+
+      background: rgba(255, 255, 255, .03);
+
+      border: 1px solid var(--border2);
+
+      border-radius: 8px;
+
+      padding: .55rem .8rem;
+
+      font-size: .82rem;
+
+      color: var(--t2);
+
+      cursor: pointer;
+
+      transition: background .15s, border-color .15s, color .15s;
+
+      text-align: left;
+
+    }
+
+    .qz-opt:hover:not(.locked) {
+
+      background: var(--p-dim);
+
+      border-color: var(--border);
+
+      color: var(--t1);
+
+    }
+
+    .qz-opt.correct {
+
+      background: rgba(52, 211, 153, .15) !important;
+
+      border-color: rgba(52, 211, 153, .5) !important;
+
+      color: var(--green) !important;
+
+    }
+
+    .qz-opt.wrong {
+
+      background: rgba(244, 114, 182, .1) !important;
+
+      border-color: rgba(244, 114, 182, .4) !important;
+
+      color: var(--pink) !important;
+
+    }
+
+    .qz-exp {
+
+      font-size: .78rem;
+
+      color: var(--t3);
+
+      margin-top: .5rem;
+
+      padding: .5rem .7rem;
+
+      background: rgba(124, 92, 252, .06);
+
+      border-radius: 6px;
+
+      display: none;
+
+    }
+
+    .qz-score {
+
+      text-align: center;
+
+      font-size: 1rem;
+
+      font-weight: 700;
+
+      color: var(--p2);
+
+    }
+
+    /* -------------------- VOICE BTN -------------------- */
+
+    #voiceBtn {
+
+      background: none;
+
+      border: none;
+
+      cursor: pointer;
+
+      color: var(--t3);
+
+      font-size: 1.1rem;
+
+      padding: .3rem;
+
+      transition: color .2s;
+
+      flex-shrink: 0;
+
+    }
+
+    #voiceBtn:hover {
+
+      color: var(--p2);
+
+    }
+
+    #voiceBtn.listening {
+
+      color: var(--pink);
+
+      animation: blink 1s ease infinite;
+
+    }
+
+    #clearBtn {
+
+      background: none;
+
+      border: none;
+
+      cursor: pointer;
+
+      color: var(--t3);
+
+      font-size: .8rem;
+
+      padding: .3rem .5rem;
+
+      border-radius: 6px;
+
+      transition: background .2s, color .2s;
+
+    }
+
+    #clearBtn:hover {
+
+      background: rgba(244, 114, 182, .1);
+
+      color: var(--pink);
+
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body>
+
+  <!-- -------------------- Topbar (mobile) -------------------- -->
+
+  <div class="topbar">
+
+    <button class="icon-btn" onclick="toggleSidebar()" title="Menu">&#9776;</button>
+
+    <span class="topbar-title">NCERT History AI</span>
+
+    <button class="icon-btn" id="voiceBtnMobile" onclick="startVoice()" title="Voice">Mic</button>
+
+    <button class="icon-btn" onclick="toggleTheme()" id="themeToggleMobile" title="Toggle theme">Night</button>
+
+  </div>
+
+  <!-- -------------------- Background: photo + overlay + dot grid -------------------- -->
+
+  <div class="bg-photo"></div>
+
+  <div class="bg-overlay"></div>
+
+  <div class="dot-grid"></div>
+
+  <!-- -------------------- Quiz Modal -------------------- -->
+
+  <div class="qz-backdrop" id="quizBackdrop">
+
+    <div class="qz-modal">
+
+      <div class="qz-header">
+
+        <span class="qz-title" id="qzTitle">&#128221; Quiz Mode</span>
+
+        <button class="qz-close" onclick="closeQuiz()">&#10005;</button>
+
+      </div>
+
+      <div id="qzBody">
+
+        <p style="font-size:.82rem;color:var(--t3);margin-bottom:.5rem">Choose a chapter to generate 4 questions:</p>
+
+        <div class="qz-sel" id="qzChapSel"></div>
+
+        <button class="qz-start" onclick="loadQuiz()" style="margin-top:.8rem">Generate Quiz &#9889;</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="shell">
+
+    <!-- &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; SIDEBAR &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+
+    <aside class="sidebar">
+
+      <a class="logo" href="#">
+
+        <div class="logo-icon-wrap">&#128218;</div>
+
+        <div class="logo-text">
+
+          <div class="logo-name">NCERT Tutor</div>
+
+          <div class="logo-sub">Class 10 - History - AI-powered</div>
+
+        </div>
+
+      </a>
+
+      <div class="s-label">Study Dashboard</div>
+
+      <div class="stats-row">
+
+        <div class="stat-card">
+
+          <div class="stat-number">5</div>
+
+          <div class="stat-label">Chapters</div>
+
+        </div>
+
+        <div class="stat-card">
+
+          <div class="stat-number" id="qCount">0</div>
+
+          <div class="stat-label">Questions</div>
+
+        </div>
+
+      </div>
+
+      <div class="sdiv"></div>
+
+      <div class="s-label">Chapters Covered</div>
+
+      <div class="ch-list" id="chapterList">
+
+        <div class="ch-pill" style="justify-content:center;color:var(--t3);font-size:0.78rem;">Loading...</div>
+
+      </div>
+
+      <div class="sdiv"></div>
+
+      <div class="s-label">&#128161; Suggested Questions</div>
+
+      <div class="sq-list" id="sqList">
+
+        <!-- Ch 1 -->
+
+        <div class="sq-item">
+
+          <div class="sq-header" onclick="toggleSQ(this)">
+
+            <span>Ch.1 - Nationalism in Europe</span><span class="sq-arrow">&#9660;</span>
+
+          </div>
+
+          <div class="sq-body">
+
+            <div class="sq-chip" onclick="ask('What was the significance of the 1848 revolution in Europe?')">What was
+
+              the significance of the 1848 revolution?</div>
+
+            <div class="sq-chip" onclick="ask('Who was Frederic Sorrieu and what was his vision?')">Who was Frederic
+
+              Sorrieu?</div>
+
+            <div class="sq-chip" onclick="ask('What role did Bismarck play in German unification?')">Bismarck and German
+
+              unification</div>
+
+            <div class="sq-chip" onclick="ask('What was the Zollverein and how did it help German unity?')">What was the
+
+              Zollverein?</div>
+
+          </div>
+
+        </div>
+
+        <!-- Ch 2 -->
+
+        <div class="sq-item">
+
+          <div class="sq-header" onclick="toggleSQ(this)">
+
+            <span>Ch.2 - Nationalism in India</span><span class="sq-arrow">&#9660;</span>
+
+          </div>
+
+          <div class="sq-body">
+
+            <div class="sq-chip" onclick="ask('What was the Non-Cooperation Movement and why did it start?')">What was
+
+              the Non-Cooperation Movement?</div>
+
+            <div class="sq-chip" onclick="ask('What was the significance of the Dandi March?')">Significance of the
+
+              Dandi March</div>
+
+            <div class="sq-chip" onclick="ask('What led to the withdrawal of the Non-Cooperation Movement in 1922?')">
+
+              Why was NCM withdrawn in 1922?</div>
+
+            <div class="sq-chip" onclick="ask('What was the role of women in the Indian national movement?')">Role of
+
+              women in national movement</div>
+
+          </div>
+
+        </div>
+
+        <!-- Ch 3 -->
+
+        <div class="sq-item">
+
+          <div class="sq-header" onclick="toggleSQ(this)">
+
+            <span>Ch.3 - The Making of a Global World</span><span class="sq-arrow">&#9660;</span>
+
+          </div>
+
+          <div class="sq-body">
+
+            <div class="sq-chip" onclick="ask('What was the Bretton Woods Agreement and what did it establish?')">What
+
+              was the Bretton Woods Agreement?</div>
+
+            <div class="sq-chip" onclick="ask('How did the Great Depression of 1929 affect India?')">Impact of the Great
+
+              Depression on India</div>
+
+            <div class="sq-chip" onclick="ask('What was the role of the Silk Roads in ancient trade?')">Role of the Silk
+
+              Roads in ancient trade</div>
+
+            <div class="sq-chip" onclick="ask('How did colonialism shape the global economy?')">Colonialism and the
+
+              global economy</div>
+
+          </div>
+
+        </div>
+
+        <!-- Ch 4 -->
+
+        <div class="sq-item">
+
+          <div class="sq-header" onclick="toggleSQ(this)">
+
+            <span>Ch.4 - Age of Industrialisation</span><span class="sq-arrow">&#9660;</span>
+
+          </div>
+
+          <div class="sq-body">
+
+            <div class="sq-chip"
+              onclick="ask('What was proto-industrialisation and how was it different from factory production?')">What
+
+              was proto-industrialisation?</div>
+
+            <div class="sq-chip" onclick="ask('What was the role of jobbers in recruiting workers for factories?')">Role
+
+              of jobbers in factories</div>
+
+            <div class="sq-chip" onclick="ask('Why did industrialisation in India grow slowly under British rule?')">Why
+
+              did industrialisation grow slowly in India?</div>
+
+            <div class="sq-chip" onclick="ask('What problems did workers face in early factories?')">Problems faced by
+
+              early factory workers</div>
+
+          </div>
+
+        </div>
+
+        <!-- Ch 5 -->
+
+        <div class="sq-item">
+
+          <div class="sq-header" onclick="toggleSQ(this)">
+
+            <span>Ch.5 - Print Culture</span><span class="sq-arrow">&#9660;</span>
+
+          </div>
+
+          <div class="sq-body">
+
+            <div class="sq-chip" onclick="ask('How did the Gutenberg printing press change the world?')">How did the
+
+              Gutenberg press change the world?</div>
+
+            <div class="sq-chip" onclick="ask('What was the impact of print culture on the French Revolution?')">Print
+
+              culture and the French Revolution</div>
+
+            <div class="sq-chip" onclick="ask('How did print culture affect women in India?')">Impact of print culture
+
+              on women in India</div>
+
+            <div class="sq-chip" onclick="ask('What was the role of newspapers in spreading nationalist ideas?')">
+
+              Newspapers and nationalist ideas</div>
+
+          </div>
+
+        </div>
+
+      </div><!-- /sq-list -->
+
+      <div class="sdiv"></div>
+
+      <div class="s-label">How It Works</div>
+
+      <div class="info-box">
+
+        Uses <strong>AI-powered context pruning</strong> to retrieve the most relevant NCERT excerpts, then generates a
+
+        focused answer &mdash; reducing LLM costs by <strong>70&ndash;80%</strong> while keeping accuracy high.
+
+      </div>
+
+      <div class="s-label">Tips</div>
+
+      <div class="tips">
+
+        <div class="tip"><span class="tip-arrow">&rsaquo;</span><span>Ask <strong
+              style="color:var(--p3)">specific</strong>
+
+            questions for better answers</span></div>
+
+        <div class="tip"><span class="tip-arrow">&rsaquo;</span><span>Mention the chapter topic for accuracy</span>
+        </div>
+
+        <div class="tip"><span class="tip-arrow">&rsaquo;</span><span>Try asking follow-up questions to go
+            deeper!</span></div>
+
+      </div>
+
+      <div class="sdiv"></div>
+
+
+
+      <div class="s-label">&#128214; Chapter Coverage</div>
+
+      <div class="tracker">
+
+        <div class="tracker-row"><span>Chapters explored</span><span id="trackerCount">0 / 5</span></div>
+
+        <div class="tracker-bar-wrap">
+
+          <div class="tracker-bar" id="trackerBar" style="width:0%"></div>
+
+        </div>
+
+        <div class="tracker-dots" id="trackerDots">
+
+          <div class="tracker-dot" data-ch="0" title="Ch.1"></div>
+
+          <div class="tracker-dot" data-ch="1" title="Ch.2"></div>
+
+          <div class="tracker-dot" data-ch="2" title="Ch.3"></div>
+
+          <div class="tracker-dot" data-ch="3" title="Ch.4"></div>
+
+          <div class="tracker-dot" data-ch="4" title="Ch.5"></div>
+
+        </div>
+
+      </div>
+
+      <div class="sdiv"></div>
+
+      <div class="quiz-launch-btn" onclick="openQuiz()">&#128221; Quiz Me! &nbsp;<span
+          style="font-size:.75rem;font-weight:400;color:var(--t3)">Test your knowledge</span></div>
+
+      <!-- Theme + Voice row -->
+
+      <div style="display:flex;gap:.5rem;margin:.5rem 1rem .3rem;">
+
+        <button onclick="toggleTheme()" id="themeBtn"
+          style="flex:1;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">Night
+
+          Dark Mode</button>
+
+      </div>
+
+    </aside>
+
+    <!-- &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; MAIN &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+
+    <main class="main">
+
+      <!-- Hero -->
+
+      <header class="hero">
+
+        <div class="hero-ring">
+
+          <div class="hero-icon-inner">&#128218;</div>
+
+        </div>
+
+        <h1 class="hero-title">NCERT History AI Tutor</h1>
+
+        <p class="hero-sub">
+
+          Your intelligent study companion for CBSE Class 10 History &mdash;
+
+          <em>India and the Contemporary World&nbsp;II</em> (Chapters 1&ndash;5)
+
+        </p>
+
+        <div class="hero-badges">
+
+          <span class="badge badge-purple"><span class="badge-dot"></span>RAG-powered</span>
+
+          <span class="badge badge-green"><span class="badge-dot"></span>NCERT Accurate</span>
+
+          <span class="badge badge-cyan"><span class="badge-dot"></span>Llama 3.2</span>
+
+        </div>
+
+      </header>
+
+      <!-- Chat window -->
+
+      <div class="chat-window" id="chatWindow">
+
+        <!-- Welcome cards -->
+
+        <div class="welcome-grid" id="welcomeGrid">
+
+          <div class="wc-wrap" onclick="prefill('What was the Non-Cooperation Movement and why did it end?')">
+
+            <div class="wc">
+
+              <div class="wc-icon">&#127757;</div>
+
+              <div class="wc-title">Nationalism in Europe</div>
+
+              <div class="wc-desc">Rise of nation-states, revolutions, and unification movements in 19th century Europe
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="wc-wrap" onclick="prefill('What were the causes of the Indian National Movement?')">
+
+            <div class="wc">
+
+              <div class="wc-icon">&#127470;&#127475;</div>
+
+              <div class="wc-title">Indian National Movement</div>
+
+              <div class="wc-desc">Freedom struggle, key leaders like Gandhi and Nehru, and milestone events</div>
+
+            </div>
+
+          </div>
+
+          <div class="wc-wrap" onclick="prefill('How did industrialisation change the world of labour?')">
+
+            <div class="wc">
+
+              <div class="wc-icon">&#127981;</div>
+
+              <div class="wc-title">Age of Industrialisation</div>
+
+              <div class="wc-desc">Factories, the changing world of labour, and proto-industrialisation</div>
+
+            </div>
+
+          </div>
+
+          <div class="wc-wrap" onclick="prefill('How did print culture transform society and spread ideas?')">
+
+            <div class="wc">
+
+              <div class="wc-icon">&#128424;&#65039;</div>
+
+              <div class="wc-title">Print Culture</div>
+
+              <div class="wc-desc">How printing transformed knowledge, society, and the modern world</div>
+
+            </div>
+
+          </div>
+
+        </div><!-- /welcome-grid -->
+
+      </div><!-- /chat-window -->
+
+      <!-- Input area -->
+
+      <div class="input-area">
+
+        <div class="input-ring">
+
+          <div class="input-inner">
+
+            <button id="voiceBtn" onclick="startVoice()" title="Voice input"
+              style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;padding:.3rem;transition:color .2s;flex-shrink:0;">Mic</button>
+
+            <textarea id="questionInput" rows="1" placeholder="Ask anything from Class 10 History..."
+              aria-label="Question input"></textarea>
+
+            <button id="clearBtn" onclick="clearChat()" title="Clear chat"
+              style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:.85rem;padding:.3rem .5rem;border-radius:6px;transition:background .2s,color .2s;flex-shrink:0;">&#240;&mdash;&#8216;&#65039;</button>
+
+            <button id="sendBtn" onclick="sendQuestion()" aria-label="Send">
+
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+
+              </svg>
+
+            </button>
+
+          </div>
+
+        </div>
+
+        <p class="input-footer">
+
+          Press <kbd>Enter</kbd> to send - <kbd>Shift+Enter</kbd> for new line
+
+        </p>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Error Toast -->
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+
+    const FOLLOWUP_MAP = { 'The Rise of Nationalism in Europe': ['What was Romanticism\'s role in European nationalism?', 'How did the French Revolution influence nationalism?', 'What was the Frankfurt Parliament?'], 'Nationalism in India': ['What led to the withdrawal of the Non-Cooperation Movement?', 'How did Gandhi use Satyagraha?', 'What was the impact of the Rowlatt Act?'], 'The Making of a Global World': ['How did the Great Depression affect global trade?', 'What was the impact of World War I on the economy?', 'What is the Bretton Woods system?'], 'The Age of Industrialisation': ['What was proto-industrialisation?', 'What problems did factory workers face?', 'How did industrialisation affect women and children?'], 'Print Culture and the Modern World': ['How did print culture help the Reformation?', 'What was the impact of print on nationalism in India?', 'How did print culture affect women?'] };
+
+    const COST_PER_TOKEN = 0.000002;
+
+    let qCount = 0, loading = false, welcomeOff = false, totalTokensUsed = 0, totalTokensSaved = 0, visitedChapters = new Set(), quizChapterId = null, recognition = null;
+
+    const chatWindow = document.getElementById('chatWindow'), input = document.getElementById('questionInput'), sendBtn = document.getElementById('sendBtn'), qCountEl = document.getElementById('qCount'), welcomeGrid = document.getElementById('welcomeGrid'), chapterList = document.getElementById('chapterList'), toast = document.getElementById('toast');
+
+    if (typeof marked !== 'undefined') marked.setOptions({ breaks: true, gfm: true });
+
+    function fmt(t) { return typeof marked !== 'undefined' ? marked.parse(t) : t.replace(/\n/g, '<br>'); }
+
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function scrollBot() { chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' }); }
+
+    function hideWelcome() { if (!welcomeOff) { welcomeGrid.classList.add('hidden'); welcomeOff = true; } }
+
+    let _tt; function showToast(m) { toast.textContent = m; toast.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(() => toast.classList.remove('show'), 3500); }
+
+    /* THEME */
+
+    function toggleTheme() { document.body.classList.toggle('light'); const L = document.body.classList.contains('light'); localStorage.setItem('theme', L ? 'light' : 'dark'); const lbl = L ? '\u00E2\u02DC\u20AC\u00EF\u00B8\u008F Light Mode' : 'Dark Mode'; const b = document.getElementById('themeBtn'); if (b) b.textContent = lbl; const b2 = document.getElementById('themeToggleMobile'); if (b2) b2.textContent = L ? '\u00E2\u02DC\u20AC\u00EF\u00B8\u008F' : 'Night'; }
+
+    if (localStorage.getItem('theme') === 'light') toggleTheme();
+
+    /* MOBILE SIDEBAR */
+
+    function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('open'); }
+
+    document.addEventListener('click', e => { const sb = document.querySelector('.sidebar'); if (sb && sb.classList.contains('open') && !sb.contains(e.target) && !e.target.closest('.topbar')) sb.classList.remove('open'); });
+
+    /* METRICS */
+
+    function updateMetrics(used, saved) { totalTokensUsed += used; totalTokensSaved += saved; document.getElementById('tokensUsed').textContent = totalTokensUsed.toLocaleString(); document.getElementById('tokensSaved').textContent = totalTokensSaved.toLocaleString(); document.getElementById('costSaved').textContent = '$' + (totalTokensSaved * COST_PER_TOKEN).toFixed(3); const pct = Math.min(100, Math.round(totalTokensSaved / (totalTokensUsed + totalTokensSaved + 1) * 100)); document.getElementById('costBar').style.width = pct + '%'; }
+
+    /* CHAPTER TRACKER */
+
+    function markChapters(sources) { if (!sources || !sources.length) return; const titles = ['The Rise of Nationalism in Europe', 'Nationalism in India', 'The Making of a Global World', 'The Age of Industrialisation', 'Print Culture and the Modern World']; sources.forEach(s => { const i = titles.indexOf(s); if (i >= 0) visitedChapters.add(i); }); document.querySelectorAll('.tracker-dot').forEach((d, i) => { if (visitedChapters.has(i)) d.classList.add('visited'); }); const n = visitedChapters.size; document.getElementById('trackerCount').textContent = n + ' / 5'; document.getElementById('trackerBar').style.width = (n / 5 * 100) + '%'; }
+
+    /* LOCAL STORAGE */
+
+    const STORE_KEY = 'ncert_chat_v1';
+
+    function saveChat() { const msgs = [...chatWindow.querySelectorAll('.msg-group')].map(g => g.outerHTML); localStorage.setItem(STORE_KEY, JSON.stringify({ msgs, qCount, totalTokensUsed, totalTokensSaved, visited: [...visitedChapters] })); }
+
+    function loadChat() { try { const raw = localStorage.getItem(STORE_KEY); if (!raw) return; const d = JSON.parse(raw); if (d.msgs && d.msgs.length) { d.msgs.forEach(h => { const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = h; chatWindow.appendChild(g); }); welcomeOff = true; welcomeGrid.classList.add('hidden'); scrollBot(); } qCount = d.qCount || 0; qCountEl.textContent = qCount; totalTokensUsed = d.totalTokensUsed || 0; totalTokensSaved = d.totalTokensSaved || 0; if (d.visited) { d.visited.forEach(i => visitedChapters.add(i)); markChapters([]); } updateMetrics(0, 0); } catch (e) { } }
+
+    function clearChat() { chatWindow.innerHTML = ''; welcomeGrid.classList.remove('hidden'); welcomeOff = false; qCount = 0; qCountEl.textContent = 0; totalTokensUsed = 0; totalTokensSaved = 0; visitedChapters.clear(); document.querySelectorAll('.tracker-dot').forEach(d => d.classList.remove('visited')); document.getElementById('trackerCount').textContent = '0 / 5'; document.getElementById('trackerBar').style.width = '0%'; document.getElementById('tokensUsed').textContent = '0'; document.getElementById('tokensSaved').textContent = '0'; document.getElementById('costSaved').textContent = '$0.000'; document.getElementById('costBar').style.width = '0%'; localStorage.removeItem(STORE_KEY); }
+
+    /* VOICE */
+
+    function startVoice() { const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) { showToast('Voice not supported in this browser'); return; } if (recognition) { recognition.stop(); recognition = null; return; } recognition = new SR(); recognition.lang = 'en-IN'; recognition.interimResults = false; const vb = document.getElementById('voiceBtn'); if (vb) vb.style.color = 'var(--pink)'; recognition.onresult = e => { input.value = e.results[0][0].transcript; input.dispatchEvent(new Event('input')); }; recognition.onend = () => { if (vb) vb.style.color = ''; recognition = null; }; recognition.onerror = () => { if (vb) vb.style.color = ''; recognition = null; showToast('Voice error - try again'); }; recognition.start(); }
+
+    /* QUIZ */
+
+    const CHAPS_QZ = [{ id: 1, title: 'Ch.1 - Nationalism in Europe' }, { id: 2, title: 'Ch.2 - Nationalism in India' }, { id: 3, title: 'Ch.3 - Making of a Global World' }, { id: 4, title: 'Ch.4 - Age of Industrialisation' }, { id: 5, title: 'Ch.5 - Print Culture' }];
+
+    function openQuiz() { document.getElementById('quizBackdrop').classList.add('open'); quizChapterId = null; document.getElementById('qzTitle').textContent = 'Quiz Mode'; document.getElementById('qzBody').innerHTML = '<p style="font-size:.82rem;color:var(--t3);margin-bottom:.5rem">Choose a chapter:</p><div class="qz-sel">' + CHAPS_QZ.map(c => `<div class="qz-ch" onclick="selQzCh(this,${c.id})">${c.title}</div>`).join('') + '</div><button class="qz-start" onclick="loadQuiz()" style="margin-top:.8rem">Generate Quiz</button>'; }
+
+    function closeQuiz() { document.getElementById('quizBackdrop').classList.remove('open'); }
+
+    function selQzCh(el, id) { quizChapterId = id; document.querySelectorAll('.qz-ch').forEach(e => e.classList.remove('active')); el.classList.add('active'); }
+
+    async function loadQuiz() { if (!quizChapterId) { showToast('Please select a chapter first'); return; } document.getElementById('qzBody').innerHTML = '<div style="text-align:center;padding:2rem;color:var(--t3)">Generating quiz</div>'; try { const res = await fetch('/quiz/' + quizChapterId); const data = await res.json(); if (data.error) { document.getElementById('qzBody').innerHTML = '<p style="color:var(--pink)">' + esc(data.error) + '</p><button class="qz-start" onclick="openQuiz()">Try Again</button>'; return; } document.getElementById('qzTitle').textContent = data.chapter; document.getElementById('qzBody').innerHTML = (data.questions || []).map((q, qi) => `<div class="qz-q"><div class="qz-q-text">${qi + 1}. ${esc(q.q)}</div><div class="qz-opts">${(q.options || []).map(o => `<button class="qz-opt" onclick="selAns(this,'${q.answer}','${(q.explanation || '').replace(/'/g, "\\'")}')"> ${esc(o)}</button>`).join('')}</div><div class="qz-exp">Explanation: ${esc(q.explanation || '')}</div></div>`).join('') + '<div class="qz-score" id="qzScore" style="display:none"></div><button class="qz-start" onclick="openQuiz()" style="margin-top:.5rem;background:linear-gradient(135deg,var(--pink),var(--p))">Try Another</button>'; } catch (e) { document.getElementById('qzBody').innerHTML = '<p style="color:var(--pink)">Error loading quiz. Is api.py running?</p>'; } }
+
+    let _qCorrect = 0, _qAnswered = 0;
+
+    function selAns(btn, correct, expl) { const opts = btn.closest('.qz-opts').querySelectorAll('.qz-opt'); if ([...opts].some(o => o.classList.contains('locked'))) return; const chosen = btn.textContent.trim()[0]; opts.forEach(o => { o.classList.add('locked'); if (o.textContent.trim()[0] === correct) o.classList.add('correct'); }); if (chosen !== correct) btn.classList.add('wrong'); else _qCorrect++; _qAnswered++; const expEl = btn.closest('.qz-q').querySelector('.qz-exp'); if (expEl) expEl.style.display = 'block'; const sc = document.getElementById('qzScore'); if (sc) { sc.style.display = 'block'; sc.textContent = `Score: ${_qCorrect} / ${_qAnswered} answered`; } }
+
+    /* INPUT */
+
+    input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; });
+
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); } });
+
+    /* CHAPTERS */
+
+    async function loadChapters() { try { const res = await fetch('/chapters'); const data = await res.json(); chapterList.innerHTML = data.map(ch => `<div class="ch-pill"><span class="ch-num">Ch.${ch.id}</span><span>${ch.title}</span></div>`).join(''); } catch { chapterList.innerHTML = '<div class="ch-pill" style="color:var(--t3);font-size:.78rem;">Could not load chapters</div>'; } }
+
+    /* USER BUBBLE */
+
+    function addUser(text) { const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = `<div class="msg-row user"><div class="av av-user">U</div><div class="bubble bubble-user">${esc(text)}</div></div>`; chatWindow.appendChild(g); scrollBot(); }
+
+    /* TYPING */
+
+    function showTyping() { const el = document.createElement('div'); el.id = 'typing'; el.className = 'typing-row'; el.innerHTML = `<div class="av av-ai">AI</div><div class="typing-bubble"><span class="typing-label">Thinking</span><span class="dot-pulse"></span><span class="dot-pulse"></span><span class="dot-pulse"></span></div>`; chatWindow.appendChild(el); scrollBot(); }
+
+    function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+    /* COPY */
+
+    function copyMsg(btn) { const body = btn.closest('.bubble-ai').querySelector('.md-body'); if (!body) return; navigator.clipboard.writeText(body.innerText).then(() => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1500); }); }
+
+    /* AI BUBBLE */
+
+    function addAI(answer, sources, tokensUsed, tokensSaved) { const srcHtml = sources && sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : ''; const fuQs = (sources || []).flatMap(s => FOLLOWUP_MAP[s] || []).slice(0, 3); const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "\\'")}")">${esc(q)}</span>`).join('')}</div>` : ''; const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body">${fmt(answer)}</div>${srcHtml}${fuHtml}</div></div>`; chatWindow.appendChild(g); scrollBot(); if (tokensUsed) updateMetrics(tokensUsed, tokensSaved || 0); if (sources) markChapters(sources); saveChat(); }
+
+    /* PREFILL */
+
+    function prefill(text) { input.value = text; input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; input.focus(); }
+
+    function toggleSQ(header) { const body = header.nextElementSibling; const isOpen = header.classList.contains('open'); document.querySelectorAll('.sq-header.open').forEach(h => { h.classList.remove('open'); h.nextElementSibling.classList.remove('open'); }); if (!isOpen) { header.classList.add('open'); body.classList.add('open'); } }
+
+    function ask(q) { input.value = q; input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; sendQuestion(); }
+
+    /* STREAMING SEND */
+
+    async function sendQuestion() {
+
+      const q = input.value.trim(); if (!q || loading) return; loading = true; sendBtn.disabled = true; input.value = ''; input.style.height = 'auto'; hideWelcome(); addUser(q); qCount++; qCountEl.textContent = qCount;
+
+      const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body" id="sb"></div></div></div>`; chatWindow.appendChild(g); scrollBot();
+
+      const sb = document.getElementById('sb'); let fullText = '', meta = null;
+
+      try {
+
+        const res = await fetch('/ask/stream?question=' + encodeURIComponent(q)); if (!res.ok) throw new Error(); const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+
+        while (true) { const { value, done } = await reader.read(); if (done) break; buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop(); for (const line of lines) { if (!line.startsWith('data:')) continue; const p = line.slice(5).trim(); if (!p) continue; try { const o = JSON.parse(p); if (o.text) { fullText += o.text; sb.innerHTML = fmt(fullText); scrollBot(); } if (o.done) meta = o; if (o.error) showToast('Error: ' + o.error); } catch { } } }
+
+        g.remove(); addAI(fullText, meta ? meta.sources : [], meta ? meta.tokens_used : 0, meta ? meta.tokens_saved : 0);
+
+      } catch { g.remove(); showToast('Error: Could not reach server. Is api.py running?'); qCount--; qCountEl.textContent = qCount; }
+
+      finally { loading = false; sendBtn.disabled = false; input.focus(); }
+
+    }
+
+    /* INIT */
+
+    loadChapters();
+
+    loadChat();
+
+    input.focus();
+
+  </script>
+
+</body>
+
+</html>
