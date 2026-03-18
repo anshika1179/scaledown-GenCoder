@@ -44,36 +44,30 @@
     }
 
     :root {
-      --p: #4c1d95;
-      --p2: #5b21b6;
-      --p3: #6d28d9;
-      --p-glow: rgba(76, 29, 149, 0.28);
-      --p-dim: rgba(76, 29, 149, .15);
-      --bg0: #f5f3ff;
-      --bg1: #ede9ff;
-      --bg2: #e2deff;
-      --bg3: #d5cfff;
-      --glass: rgba(237, 233, 255, .88);
-      --border: rgba(124, 92, 252, .28);
-      --border2: rgba(0, 0, 0, .20);
-      --t1: #0a081a;
-      --t2: #1e1b3a;
-      --t3: #2d2948;
+      /* DARK THEME (Default) - Black & Purple */
+      --p: #7c3aed;
+      --p2: #8b5cf6;
+      --p3: #a78bfa;
+      --p-glow: rgba(124, 58, 237, 0.3);
+      --p-dim: rgba(124, 58, 237, 0.12);
+      --bg0: #030014;
+      --bg1: #090919;
+      --bg2: #12122b;
+      --bg3: #1a1a3a;
+      --glass: rgba(10, 10, 30, 0.85);
+      --border: rgba(124, 92, 252, 0.25);
+      --border2: rgba(255, 255, 255, 0.08);
+      --t1: #f8fafc;
+      --t2: #cbd5e1;
+      --t3: #94a3b8;
 
-      --green: #34d399;
-
-      --pink: #f472b6;
-
-      --cyan: #22d3ee;
-
+      --green: #10b981;
+      --pink: #ec4899;
+      --cyan: #06b6d4;
       --sw: 300px;
-
       --r1: 20px;
-
       --r2: 14px;
-
       --r3: 8px;
-
     }
 
     html,
@@ -149,19 +143,11 @@
     /* Purple-tinted dark gradient overlay so glassmorphism pops */
 
     .bg-overlay {
-
       position: fixed;
-
       inset: 0;
-
       z-index: 0;
-
-      background:
-
-        linear-gradient(160deg, rgba(230,224,255,.78) 0%, rgba(210,205,255,.62) 100%);
-
+      background: radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.15) 0%, rgba(3, 0, 20, 0.95) 100%);
       pointer-events: none;
-
     }
 
     /* Dot grid texture on top */
@@ -2112,16 +2098,15 @@
       --bg2: #e2deff;
       --bg3: #d5cfff;
       --glass: rgba(237, 233, 255, .88);
-      --border: #7c5cfc;
-      --border2: rgba(0, 0, 0, .2);
-      --t1: #0a081a;
-      --t2: #1e1b3a;
-      --t3: #3b3561;
-      --p: #4c1d95;
-      --p2: #5b21b6;
-      --p3: #6d28d9;
-      --p-dim: rgba(124, 92, 252, .15);
-
+      --border: rgba(124, 92, 252, .2);
+      --border2: rgba(0, 0, 0, .1);
+      --t1: #0a0812;
+      --t2: #1e1b35;
+      --t3: #3b355a;
+      --p: #5b21b6;
+      --p2: #6d28d9;
+      --p3: #7c3aed;
+      --p-dim: rgba(124, 92, 252, .12);
     }
 
     body.light .bg-photo {
@@ -3462,9 +3447,7 @@
     /* INIT */
 
     loadChapters();
-
-    loadChat();
-
+    // loadChat(); // Disabled automatic load to keep session fresh as requested
     input.focus();
 
   </script>
