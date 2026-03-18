@@ -2817,9 +2817,9 @@
 
     <span class="topbar-title">NCERT History AI</span>
 
-    <button class="icon-btn" id="voiceBtnMobile" onclick="startVoice()" title="Voice">Mic</button>
+    <button class="icon-btn" id="voiceBtnMobile" onclick="startVoice()" title="Voice">&#127897;</button>
 
-    <button class="icon-btn" onclick="toggleTheme()" id="themeToggleMobile" title="Toggle theme">Night</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeToggleMobile" title="Toggle theme">&#127769;</button>
 
   </div>
 
@@ -3151,9 +3151,7 @@
       <div style="display:flex;gap:.5rem;margin:.5rem 1rem .3rem;">
 
         <button onclick="toggleTheme()" id="themeBtn"
-          style="flex:1;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">Night
-
-          Dark Mode</button>
+          style="flex:1;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">🌙 Dark Mode</button>
 
       </div>
 
@@ -3274,7 +3272,7 @@
           <div class="input-inner">
 
             <button id="voiceBtn" onclick="startVoice()" title="Voice input"
-              style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;padding:.3rem;transition:color .2s;flex-shrink:0;">Mic</button>
+              style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:1.1rem;padding:.3rem;transition:color .2s;flex-shrink:0;">&#127897;</button>
 
             <textarea id="questionInput" rows="1" placeholder="Ask anything from Class 10 History..."
               aria-label="Question input"></textarea>
@@ -3339,7 +3337,21 @@
 
     /* THEME */
 
-    function toggleTheme() { document.body.classList.toggle('light'); const L = document.body.classList.contains('light'); localStorage.setItem('theme', L ? 'light' : 'dark'); const lbl = L ? '\u00E2\u02DC\u20AC\u00EF\u00B8\u008F Light Mode' : 'Dark Mode'; const b = document.getElementById('themeBtn'); if (b) b.textContent = lbl; const b2 = document.getElementById('themeToggleMobile'); if (b2) b2.textContent = L ? '\u00E2\u02DC\u20AC\u00EF\u00B8\u008F' : 'Night'; }
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      
+      const themeBtn = document.getElementById('themeBtn');
+      const themeToggleMobile = document.getElementById('themeToggleMobile');
+      
+      if (themeBtn) {
+        themeBtn.textContent = isLight ? '☀️ Light Mode' : '🌙 Dark Mode';
+      }
+      if (themeToggleMobile) {
+        themeToggleMobile.textContent = isLight ? '☀️' : '🌙';
+      }
+    }
 
     if (localStorage.getItem('theme') === 'light') toggleTheme();
 
