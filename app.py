@@ -5,7 +5,7 @@ from tutor_backend import get_relevant_context, generate_answer, chapters
 # ── Page Config ──────────────────────────────────────────────
 st.set_page_config(
     page_title="NCERT History Tutor | Class 10",
-    page_icon="📚",
+    page_icon="📖",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -290,7 +290,7 @@ strong, b {
 # ── Hero Header ──────────────────────────────────────────────
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-icon">📚</div>
+    <div class="hero-icon">📖</div>
     <div class="hero-title">NCERT History AI Tutor</div>
     <div class="hero-subtitle">
         Your intelligent study companion for CBSE Class 10 History — 
@@ -302,7 +302,7 @@ st.markdown("""
 
 # ── Sidebar ──────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🎓 Study Dashboard")
+    st.markdown("### Study Dashboard")
 
     st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 
@@ -326,7 +326,7 @@ with st.sidebar:
 
     st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown("#### 📖 Chapters Covered")
+    st.markdown("#### Chapters Covered")
     for idx, ch in enumerate(chapters, 1):
         st.markdown(f"""
         <div class="chapter-pill">
@@ -336,14 +336,14 @@ with st.sidebar:
 
     st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown("#### ⚡ How It Works")
+    st.markdown("#### How It Works")
     st.info(
         "This tutor uses AI-powered context pruning to find the most relevant "
         "textbook excerpts for your question, then generates a focused answer — "
         "reducing LLM costs by 70–80% while keeping answers accurate."
     )
 
-    st.markdown("#### 💡 Tips")
+    st.markdown("#### Tips")
     st.markdown("""
     - Ask **specific** questions for better answers
     - Mention chapter topics to improve accuracy
@@ -402,7 +402,7 @@ if prompt := st.chat_input("Ask any question from Class 10 History..."):
             else:
                 sources = list(set(c['chapter_title'] for c in chunks))
                 answer = generate_answer(prompt, chunks)
-                answer += f"\n\n---\n📖 **Sources:** {' · '.join(sources)}"
+                answer += f"\n\n---\n**Sources:** {' - '.join(sources)}"
 
         st.markdown(answer)
 
