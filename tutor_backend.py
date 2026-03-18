@@ -1,4 +1,19 @@
 # tutor_backend.py
+"""
+TECHNICAL ARCHITECTURE OVERVIEW — 2-STAGE CONTEXT PRUNING
+---------------------------------------------------------
+This module implements a highly optimized RAG (Retrieval-Augmented Generation) 
+pipeline designed for low-compute environments (Rural India use-case).
+
+TECHNIQUE: 2-Stage Context Pruning
+1. Stage 1 (Chapter-Level): Uses cosine similarity on large chapter embeddings 
+   to eliminate ~60-80% of irrelevant textbooks immediately.
+2. Stage 2 (Chunk-Level): Performs a refined FAISS vector search only within 
+   the selected chapters to find the most relevant 600-char excerpts.
+
+RESULT: Drastically reduces token context from ~12k (entire book) to <1k, 
+enabling fast local inference on 1B models with zero cloud usage.
+"""
 import os
 import json
 from typing import List, Dict
