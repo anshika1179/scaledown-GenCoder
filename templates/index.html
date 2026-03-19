@@ -3410,7 +3410,23 @@
 
     /* AI BUBBLE */
 
-    function addAI(answer, sources, tokensUsed, tokensSaved) { const srcHtml = sources && sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : ''; const fuQs = (sources || []).flatMap(s => FOLLOWUP_MAP[s] || []).slice(0, 3); const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "\\'")}")">${esc(q)}</span>`).join('')}</div>` : ''; const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body">${fmt(answer)}</div>${srcHtml}${fuHtml}</div></div>`; chatWindow.appendChild(g); scrollBot(); if (tokensUsed) updateMetrics(tokensUsed, tokensSaved || 0); if (sources) markChapters(sources); saveChat(); }
+    function addAI(answer, sources, tokensUsed, tokensSaved) {
+      if (!answer) return;
+      const srcHtml = sources && sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : '';
+      const fuQs = (sources || []).flatMap(s => {
+        const key = Object.keys(FOLLOWUP_MAP).find(k => s.includes(k));
+        return key ? FOLLOWUP_MAP[key] : [];
+      }).slice(0, 3);
+      const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "\\'")}')">${esc(q)}</span>`).join('')}</div>` : '';
+      const g = document.createElement('div');
+      g.className = 'msg-group';
+      g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body">${fmt(answer)}</div>${srcHtml}${fuHtml}</div></div>`;
+      chatWindow.appendChild(g);
+      scrollBot();
+      if (tokensUsed) updateMetrics(tokensUsed, tokensSaved || 0);
+      if (sources) markChapters(sources);
+      saveChat();
+    }
 
     /* PREFILL */
 
@@ -3423,25 +3439,98 @@
     /* STREAMING SEND */
 
     async function sendQuestion() {
+      const q = input.value.trim();
+      if (!q || loading) return;
+      loading = true;
+      sendBtn.disabled = true;
+      input.value = '';
+      input.style.height = 'auto';
+      hideWelcome();
+      addUser(q);
 
-      const q = input.value.trim(); if (!q || loading) return; loading = true; sendBtn.disabled = true; input.value = ''; input.style.height = 'auto'; hideWelcome(); addUser(q); qCount++; qCountEl.textContent = qCount;
+      // Increment counter immediately
+      qCount++;
+      qCountEl.textContent = qCount;
 
-      const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body" id="sb"></div></div></div>`; chatWindow.appendChild(g); scrollBot();
+      const g = document.createElement('div');
+      g.className = 'msg-group';
+      g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body" id="sb"></div></div></div>`;
+      chatWindow.appendChild(g);
+      scrollBot();
 
-      const sb = document.getElementById('sb'); let fullText = '', meta = null;
+      const sb = document.getElementById('sb');
+      let fullText = '', meta = null, receivedAny = false;
 
       try {
+        const res = await fetch('/ask/stream?question=' + encodeURIComponent(q));
+        if (!res.ok) throw new Error('Server error');
+        
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '';
 
-        const res = await fetch('/ask/stream?question=' + encodeURIComponent(q)); if (!res.ok) throw new Error(); const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            // Process remaining buffer
+            if (buf) {
+              const lines = buf.split('\n');
+              for (const line of lines) {
+                if (!line.startsWith('data:')) continue;
+                const p = line.slice(5).trim();
+                if (!p) continue;
+                try {
+                  const o = JSON.parse(p);
+                  if (o.text) { fullText += o.text; receivedAny = true; }
+                  if (o.done) meta = o;
+                } catch(e) {}
+              }
+            }
+            break;
+          }
+          
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop();
 
-        while (true) { const { value, done } = await reader.read(); if (done) break; buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop(); for (const line of lines) { if (!line.startsWith('data:')) continue; const p = line.slice(5).trim(); if (!p) continue; try { const o = JSON.parse(p); if (o.text) { fullText += o.text; sb.innerHTML = fmt(fullText); scrollBot(); } if (o.done) meta = o; if (o.error) showToast('Error: ' + o.error); } catch { } } }
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            const p = line.slice(5).trim();
+            if (!p) continue;
+            try {
+              const o = JSON.parse(p);
+              if (o.text) {
+                fullText += o.text;
+                receivedAny = true;
+                sb.innerHTML = fmt(fullText);
+                scrollBot();
+              }
+              if (o.done) meta = o;
+              if (o.error && !receivedAny) showToast('Error: ' + o.error);
+            } catch (e) { }
+          }
+        }
 
-        g.remove(); addAI(fullText, meta ? meta.sources : [], meta ? meta.tokens_used : 0, meta ? meta.tokens_saved : 0);
+        g.remove();
+        addAI(fullText, meta ? meta.sources : [], meta ? meta.tokens_used : 0, meta ? meta.tokens_saved : 0);
 
-      } catch { g.remove(); showToast('Error: Could not reach server. Is api.py running?'); qCount--; qCountEl.textContent = qCount; }
-
-      finally { loading = false; sendBtn.disabled = false; input.focus(); }
-
+      } catch (e) {
+        console.error(e);
+        g.remove();
+        if (!receivedAny) {
+          showToast('Could not reach server. Is it running?');
+          qCount--; // Only decrement if we got absolutely nothing
+          qCountEl.textContent = qCount;
+        } else {
+          // Even if it failed midway, keep the count as the user saw partial response
+          addAI(fullText + "\n\n[Connection lost...]", meta ? meta.sources : [], 0, 0);
+        }
+      } finally {
+        loading = false;
+        sendBtn.disabled = false;
+        input.focus();
+        saveChat(); // Persistent save
+      }
     }
 
     /* INIT */
