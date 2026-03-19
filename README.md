@@ -110,6 +110,20 @@ session 3 project/
 
 ---
 
+## 🚀 Deployment (Cloud Ready)
+
+This project is configured for one-click deployment to **Render** or **Railway**.
+
+### Steps to Host:
+1.  **Fork/Push** this repository to your GitHub.
+2.  Create a new **Web Service** on [Render.com](https://render.com/).
+3.  Connect this repository.
+4.  **Important**: In the Render "Environment" settings, add:
+    -   `GEMINI_API_KEY`: Your free key from [Google AI Studio](https://aistudio.google.com/).
+5.  Render will automatically use the `Procfile` and `requirements.txt` to build and launch your site!
+
+---
+
 ## ⚙️ Tech Stack & Dependencies
 
 | Component | Technology |

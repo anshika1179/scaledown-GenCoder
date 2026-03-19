@@ -2,7 +2,8 @@
 import json
 import functools
 from flask import Flask, request, jsonify, render_template, Response, stream_with_context
-from tutor_backend import get_relevant_context, generate_answer, chapters
+import os
+from tutor_backend import get_relevant_context, generate_answer, chapters, HAS_API_KEY, model
 import ollama
 
 app = Flask(__name__)
@@ -65,6 +66,11 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "api_mode": "gemini" if HAS_API_KEY else "ollama"})
+
+
 @app.route("/chapters", methods=["GET"])
 def get_chapters():
     return jsonify([{"id": i + 1, "title": ch["title"]} for i, ch in enumerate(chapters)])
@@ -107,15 +113,24 @@ def ask_stream():
 
     def _stream():
         try:
-            for part in ollama.chat(
-                model=LLM_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                stream=True,
-                options={"num_predict": 400, "temperature": 0.2, "top_p": 0.85},
-            ):
-                text = part.get("message", {}).get("content", "")
-                if text:
-                    yield f"data: {json.dumps({'text': text})}\n\n"
+            if HAS_API_KEY:
+                # Gemini Streaming
+                response = model.generate_content(prompt, stream=True)
+                for chunk in response:
+                    if chunk.text:
+                        yield f"data: {json.dumps({'text': chunk.text})}\n\n"
+            else:
+                # Ollama Streaming
+                for part in ollama.chat(
+                    model=LLM_MODEL,
+                    messages=[{"role": "user", "content": prompt}],
+                    stream=True,
+                    options={"num_predict": 400, "temperature": 0.2, "top_p": 0.85},
+                ):
+                    text = part.get("message", {}).get("content", "")
+                    if text:
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+            
             done_payload = json.dumps({'done': True, 'sources': sources,
                                        'tokens_used': tokens_used, 'tokens_saved': tokens_saved})
             yield f"data: {done_payload}\n\n"
@@ -188,4 +203,5 @@ JSON:"""
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
