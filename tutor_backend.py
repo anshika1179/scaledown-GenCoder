@@ -34,6 +34,7 @@ if HAS_API_KEY:
     model = genai.GenerativeModel("gemini-1.5-flash")
 else:
     import ollama  # Fallback for local-only testing
+    model = None
 
 # ── Config ────────────────────────────────────────────────────
 CHAPTER_FOLDER = "ncert_history_chapters"
