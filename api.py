@@ -159,10 +159,10 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
 {{
   "questions": [
     {{
-      "q": "Question text?",
-      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "q": "What year did the French Revolution begin?",
+      "options": ["A. 1789", "B. 1792", "C. 1776", "D. 1804"],
       "answer": "A",
-      "explanation": "One sentence why A is correct."
+      "explanation": "The French Revolution began in 1789 with the storming of the Bastille."
     }}
   ]
 }}
@@ -173,14 +173,21 @@ Textbook excerpt:
 JSON:"""
 
     try:
-        response = ollama.chat(
-            model=LLM_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            format="json",
-            options={"num_predict": 900, "temperature": 0.25},
-        )
+        if HAS_API_KEY:
+            # Gemini Quiz Generation
+            response = model.generate_content(prompt)
+            content = response.text.strip()
+        else:
+            # Ollama Quiz Generation
+            response = ollama.chat(
+                model=LLM_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                format="json",
+                options={"num_predict": 900, "temperature": 0.25},
+            )
+            content = response["message"]["content"].strip()
+        
         import re
-        content = response["message"]["content"].strip()
         # Find the JSON array part
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)
         if match:
@@ -194,10 +201,10 @@ JSON:"""
             try:
                 quiz = json.loads(content[start:end])
                 return jsonify({"chapter": chap["title"], **quiz})
-            except Exception as json_e:
-                pass # fall through to error
+            except Exception:
+                pass 
                 
-        return jsonify({"error": "LLM returned unparseable JSON — try again"}), 500
+        return jsonify({"error": "LLM returned unparseable JSON — please try again"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
