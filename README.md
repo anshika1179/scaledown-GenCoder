@@ -8,7 +8,9 @@ pinned: false
 ---
 
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
-**🔴 LIVE DEMO:** [Click here to try the App!](https://huggingface.co/spaces/anshika1179/scaledown-gencoder)
+[![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
+
+**🔴 LIVE DEMO:** [Click here to try the App!](https://anshika1179-scaledown-gencoder.hf.space)
 
 > **GenCoder Challenge · Session 3** | Track: AI/ML · Technique: **Context Pruning**
 
