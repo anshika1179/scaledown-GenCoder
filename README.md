@@ -1,3 +1,12 @@
+---
+title: NCERT AI Tutor
+emoji: 📚
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 
 > **GenCoder Challenge · Session 3** | Track: AI/ML · Technique: **Context Pruning**
