@@ -1,12 +1,8 @@
-# Use a lightweight Python machine
-FROM python:3.10-slim
+# Use official Ollama image which has Ollama perfectly installed
+FROM ollama/ollama
 
-# Install system utilities needed for Ollama
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Install Ollama directly from binary to avoid systemd errors in Docker
-RUN curl -L https://ollama.com/download/ollama-linux-amd64 -o /usr/bin/ollama \
-    && chmod +x /usr/bin/ollama
+# Install python and pip
+RUN apt-get update && apt-get install -y python3 python3-pip curl && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
@@ -14,14 +10,13 @@ WORKDIR /app
 # Copy your entire existing project folder into the Hugging Face container
 COPY . /app
 
-# Install your Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+# Install your Python packages (including the new ollama package from requirements)
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Create a startup script that runs Python and Ollama at the same time!
 RUN echo '#!/bin/bash\n\
     # Start the Ollama server in the background\n\
     ollama serve &\n\
-    # Wait a few seconds for exactly Ollama to start cleanly\n\
     sleep 5\n\
     # Pull the specific Llama model down\n\
     ollama pull llama3.2:1b\n\
@@ -31,8 +26,6 @@ RUN echo '#!/bin/bash\n\
 
 RUN chmod +x /app/start.sh
 
-# Hugging Face Spaces strictly requires applications to run on port 7860
 EXPOSE 7860
-
 # Execute
 CMD ["/app/start.sh"]
