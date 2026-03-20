@@ -68,6 +68,7 @@
       --r1: 20px;
       --r2: 14px;
       --r3: 8px;
+      --btn-bg: rgba(255, 255, 255, 0.04);
     }
 
     html,
@@ -2099,7 +2100,7 @@
       --bg1: #ede9ff;
       --bg2: #e2deff;
       --bg3: #d5cfff;
-      --glass: rgba(10, 10, 25, .9);
+      --glass: rgba(245, 243, 255, .85);
       --border: rgba(124, 92, 252, .2);
       --border2: rgba(0, 0, 0, .1);
       --t1: #0a0812;
@@ -2109,6 +2110,7 @@
       --p2: #6d28d9;
       --p3: #7c3aed;
       --p-dim: rgba(124, 92, 252, .12);
+      --btn-bg: rgba(0, 0, 0, 0.05);
     }
 
     body.light .bg-photo {
@@ -3140,7 +3142,7 @@
       <div style="display:flex;gap:.5rem;margin:.5rem 1rem .3rem;">
 
         <button onclick="toggleTheme()" id="themeBtn"
-          style="flex:1;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">🌙
+          style="flex:1;padding:.55rem;background:var(--btn-bg);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">🌙
           Dark Mode</button>
 
       </div>
