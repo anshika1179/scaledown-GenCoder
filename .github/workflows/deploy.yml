@@ -15,4 +15,4 @@ jobs:
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://anshika1179:$HF_TOKEN@huggingface.co/spaces/anshika1179/scaledown-gencoder main
+        run: git push --force https://anshika1179:$HF_TOKEN@huggingface.co/spaces/anshika1179/scaledown-gencoder main
