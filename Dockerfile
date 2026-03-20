@@ -27,5 +27,7 @@ RUN echo '#!/bin/bash\n\
 RUN chmod +x /app/start.sh
 
 EXPOSE 7860
+# Override the default ollama entrypoint
+ENTRYPOINT []
 # Execute
-CMD ["/app/start.sh"]
+CMD ["/bin/bash", "/app/start.sh"]
