@@ -11,7 +11,7 @@ WORKDIR /app
 COPY . /app
 
 # Install your Python packages (including the new ollama package from requirements)
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
 
 # Create a startup script that runs Python and Ollama at the same time!
 RUN echo '#!/bin/bash\n\
