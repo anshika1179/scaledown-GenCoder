@@ -17,4 +17,4 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           pip install huggingface_hub
-          huggingface-cli upload anshika1179/scaledown-gencoder . . --repo-type space --delete "*" --token $HF_TOKEN
+          python -c "import os; from huggingface_hub import HfApi; api = HfApi(token=os.environ['HF_TOKEN']); api.upload_folder(folder_path='.', repo_id='anshika1179/scaledown-gencoder', repo_type='space', ignore_patterns=['.git/*'])"
