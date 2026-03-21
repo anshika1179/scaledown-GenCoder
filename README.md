@@ -61,15 +61,17 @@ Student Query → Embed → [Stage 1: Chapter Filter] → [Stage 2: Chunk Filter
 ```
 
 **Stage 1 — Chapter-Level Pruning:**
-- Encode the question and compute cosine similarity against each chapter's summary embedding
-- **Select only Top-2 most relevant chapters** (out of 5) → eliminates 60% of the corpus immediately
+- Encode the question and compute cosine similarity against each chapter's summary embedding.
+- **Select only Top-2 most relevant chapters** (out of 5) → eliminates 60% of the corpus immediately.
+- **Optimisation**: Chapter embeddings are **cached at startup** for near-instant filtering.
 
 **Stage 2 — Chunk-Level Pruning:**
-- Run FAISS nearest-neighbor search across 60 candidates
-- **Keep only chunks from the Top-2 chapters** → further filters irrelevant content
-- Pass **Top-5 final chunks** to the LLM
+- Run FAISS nearest-neighbor search across **60 candidates** (expanded from 20 for better grounding).
+- **Keep only chunks from the Top-2 chapters** → further filters irrelevant content.
+- Pass **Top-5 final chunks** to the LLM.
 
-> *Local Ollama Llama 3.2 makes it free to run — no cloud API needed.*
+> *Local Ollama Llama 3.2 makes it free to run — no cloud API needed. The system handles "zero-intersection" scenarios with a deeper search pool.*
+
 
 ---
 
@@ -192,7 +194,8 @@ streamlit run app.py
 - 📝 **Interactive Quiz Mode** — Automatically generates challenging MCQs for any chapter using strict JSON parsing
 - 💾 **Offline-first** — FAISS index pre-built, no re-processing per query
 - 🤖 **Local LLM** — Llama 3.2 (1B) via Ollama, zero cloud API cost
-- 🎨 **Premium English-Only UI** — Dark-themed, glassmorphism design with strict UTF-8 English text compliance
+- 🎨 **Premium UI & Theming** — Dark-themed, glassmorphism design with accessibility in mind (improved contrast variables)
+- 🔤 **Robust Text Processing** — Advanced encoding resolution scripts ensure stable UTF-8 English text rendering, eliminating garbled characters from messy PDF sources
 - 📖 **Source Citation** — Every answer shows exactly which chapter it came from
 - 📱 **Mobile-responsive** — Works on low-end devices and small screens
 
