@@ -39,8 +39,8 @@ Build an intelligent tutoring system capable of:
 | Constraint | Solution |
 |---|---|
 | Must ingest large PDFs without re-processing every time | FAISS index built **once**, loaded from disk on startup |
-| Must provide interactive ways to test knowledge | **Quiz Mode** generates chapter-specific MCQs using Llama 3.2 |
-| Must work on low-bandwidth / low-compute devices | Local LLM (Ollama), no external API calls, offline-capable |
+| Must provide interactive ways to test knowledge | **Quiz Mode** generates chapter-specific MCQs using Qwen2.5/DeepSeek |
+| Must work on low-bandwidth / low-compute devices | Multi-provider cloud LLM via HuggingFace Inference Providers — zero local GPU needed |
 
 ---
 
@@ -81,7 +81,7 @@ Student Query → Embed → [Stage 1: Chapter Filter] → [Stage 2: Chunk Filter
 - **Keep only chunks from the Top-2 chapters** → further filters irrelevant content.
 - Pass **Top-5 final chunks** to the LLM.
 
-> *Local Ollama Llama 3.2 makes it free to run — no cloud API needed. The system handles "zero-intersection" scenarios with a deeper search pool.*
+> *Multi-provider HuggingFace Inference (novita / sambanova) makes it free to run — no paid API needed. The system handles "zero-intersection" scenarios with a deeper search pool and automatic provider fallback.*
 
 
 ---
@@ -95,7 +95,7 @@ The **2-Stage Context Pruning** technique directly addresses the high cost and l
 | **Context Tokens** | ~12,000+ (Entire Book) | ~800 - 1,200 | **~90% Reduction** |
 | **Inference Time** | 45s+ (on low-end CPU) | 2s - 5s | **~10x Speedup** |
 | **Local Memory** | High (Context overflow) | Low (< 2GB) | **Rock-solid Stability** |
-| **Cost per Query** | $0.005+ (Cloud API) | **$0.00 (Local Llama 3.2)** | **100% Cost Savings** |
+| **Cost per Query** | $0.005+ (Cloud API) | **$0.00 (HF Free Tier)** | **100% Cost Savings** |
 | **Answer Quality** | Prone to hallucinations | Grounded in exact passages | **High Quality Preservation** |
 
 ---
@@ -136,8 +136,9 @@ This project is fully containerized and currently deployed on **Hugging Face Spa
 1.  Create a new **Docker Space** on [Hugging Face](https://huggingface.co/spaces).
 2.  Connect your GitHub repository to the Space (or upload the files directly).
 3.  **Important**: In the Space Settings > Variables and Secrets, add:
-    -   `GEMINI_API_KEY`: Your free key from Google AI Studio (used as the cloud fallback LLM).
+    -   `HF_TOKEN`: Your free Hugging Face API token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). Create a **Fine-grained** token with **"Make calls to Inference Providers"** permission enabled.
 4.  Hugging Face will automatically use the provided `Dockerfile` to build the environment, download the FAISS index, and launch the `gunicorn` server!
+5.  The app uses a **multi-provider fallback system** — it automatically tries multiple AI providers (novita, sambanova) until one responds, ensuring maximum uptime.
 
 ---
 
@@ -145,7 +146,8 @@ This project is fully containerized and currently deployed on **Hugging Face Spa
 
 | Component | Technology |
 |---|---|
-| **LLM (Inference)** | [Mistral-7B-Instruct-v0.2](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2) via HuggingFace free Inference API |
+| **LLM (Inference)** | Multi-provider: [Qwen2.5-Coder-32B](https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct) via novita, [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) via sambanova — automatic fallback |
+| **Inference Router** | HuggingFace Inference Providers (`provider="novita"` / `"sambanova"`) |
 | **Embeddings** | `sentence-transformers` · `all-MiniLM-L6-v2` |
 | **Vector Search** | `faiss-cpu` |
 | **PDF Parsing** | `PyMuPDF (fitz)` & `pypdf` |
@@ -190,7 +192,7 @@ python api.py
 - 🔪 **2-Stage Context Pruning** — Drastically reduces token context by ~90%, enabling fast inference
 - 📝 **Interactive Quiz Mode** — Automatically generates challenging MCQs for any chapter using strict JSON parsing
 - 💾 **Pre-built FAISS Index** — Built once at startup, loaded instantly on every subsequent run
-- 🤖 **Free LLM Inference** — Powered by Mistral-7B via HuggingFace's free serverless API — zero cost, no API key required
+- 🤖 **Free LLM Inference** — Multi-provider fallback (Qwen2.5 via novita, DeepSeek-R1 via sambanova) through HuggingFace Inference Providers — zero cost
 - 🎨 **Premium UI & Theming** — Dark-themed, glassmorphism design with improved contrast and accessibility
 - 🔤 **Robust Text Processing** — Advanced encoding resolution ensures stable UTF-8 rendering, eliminating garbled characters from PDF sources
 - 📖 **Source Citation** — Every answer shows exactly which chapter it came from
