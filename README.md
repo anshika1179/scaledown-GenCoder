@@ -1,10 +1,5 @@
 ---
-title: Scaledown Gencoder
-emoji: 📚
-colorFrom: blue
-colorTo: purple
-sdk: docker
-pinned: false
+
 ---
 
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
