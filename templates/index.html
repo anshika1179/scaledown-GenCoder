@@ -3369,7 +3369,7 @@
 
     function loadChat() { try { const raw = localStorage.getItem(STORE_KEY); if (!raw) return; const d = JSON.parse(raw); if (d.msgs && d.msgs.length) { d.msgs.forEach(h => { const g = document.createElement('div'); g.className = 'msg-group'; g.innerHTML = h; chatWindow.appendChild(g); }); welcomeOff = true; welcomeGrid.classList.add('hidden'); scrollBot(); } qCount = d.qCount || 0; qCountEl.textContent = qCount; totalTokensUsed = d.totalTokensUsed || 0; totalTokensSaved = d.totalTokensSaved || 0; if (d.visited) { d.visited.forEach(i => visitedChapters.add(i)); markChapters([]); } updateMetrics(0, 0); } catch (e) { } }
 
-    function clearChat() { chatWindow.innerHTML = ''; welcomeGrid.classList.remove('hidden'); welcomeOff = false; qCount = 0; qCountEl.textContent = 0; totalTokensUsed = 0; totalTokensSaved = 0; visitedChapters.clear(); document.querySelectorAll('.tracker-dot').forEach(d => d.classList.remove('visited')); document.getElementById('trackerCount').textContent = '0 / 5'; document.getElementById('trackerBar').style.width = '0%'; document.getElementById('tokensUsed').textContent = '0'; document.getElementById('tokensSaved').textContent = '0'; document.getElementById('costSaved').textContent = '$0.000'; document.getElementById('costBar').style.width = '0%'; localStorage.removeItem(STORE_KEY); }
+    function clearChat() { chatWindow.innerHTML = ''; welcomeGrid.classList.remove('hidden'); welcomeOff = false; qCount = 0; qCountEl.textContent = 0; totalTokensUsed = 0; totalTokensSaved = 0; loading = false; sendBtn.disabled = false; visitedChapters.clear(); document.querySelectorAll('.tracker-dot').forEach(d => d.classList.remove('visited')); document.getElementById('trackerCount').textContent = '0 / 5'; document.getElementById('trackerBar').style.width = '0%'; document.getElementById('tokensUsed').textContent = '0'; document.getElementById('tokensSaved').textContent = '0'; document.getElementById('costSaved').textContent = '$0.000'; document.getElementById('costBar').style.width = '0%'; localStorage.removeItem(STORE_KEY); }
 
     /* VOICE */
 
@@ -3526,35 +3526,41 @@
           qCount--;
           qCountEl.textContent = qCount;
         }
+      } finally {
+        // ALWAYS reset loading state, even if an error occurs
+        loading = false;
+        sendBtn.disabled = false;
+        input.focus();
       }
 
       // Update the SAME bubble in-place with final formatting, sources, and follow-ups
-      if (receivedAny && fullText) {
-        const sources = meta ? (meta.sources || []) : [];
-        const tokensUsed = meta ? (meta.tokens_used || 0) : 0;
-        const tokensSaved = meta ? (meta.tokens_saved || 0) : 0;
+      try {
+        if (receivedAny && fullText) {
+          const sources = meta ? (meta.sources || []) : [];
+          const tokensUsed = meta ? (meta.tokens_used || 0) : 0;
+          const tokensSaved = meta ? (meta.tokens_saved || 0) : 0;
 
-        sb.innerHTML = fmt(fullText);
+          sb.innerHTML = fmt(fullText);
 
-        const srcHtml = sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : '';
-        const fuQs = sources.flatMap(s => {
-          const key = Object.keys(FOLLOWUP_MAP).find(k => s.includes(k));
-          return key ? FOLLOWUP_MAP[key] : [];
-        }).slice(0, 3);
-        const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "\\\\'")}')">${esc(q)}</span>`).join('')}</div>` : '';
+          const srcHtml = sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : '';
+          const fuQs = sources.flatMap(s => {
+            const key = Object.keys(FOLLOWUP_MAP).find(k => s.includes(k));
+            return key ? FOLLOWUP_MAP[key] : [];
+          }).slice(0, 3);
+          const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "&apos;")}')"> ${esc(q)}</span>`).join('')}</div>` : '';
 
-        const bubble = g.querySelector('.bubble-ai');
-        if (srcHtml) bubble.insertAdjacentHTML('beforeend', srcHtml);
-        if (fuHtml) bubble.insertAdjacentHTML('beforeend', fuHtml);
+          const bubble = g.querySelector('.bubble-ai');
+          if (srcHtml) bubble.insertAdjacentHTML('beforeend', srcHtml);
+          if (fuHtml) bubble.insertAdjacentHTML('beforeend', fuHtml);
 
-        scrollBot();
-        if (tokensUsed) updateMetrics(tokensUsed, tokensSaved);
-        if (sources.length) markChapters(sources);
+          scrollBot();
+          if (tokensUsed) updateMetrics(tokensUsed, tokensSaved);
+          if (sources.length) markChapters(sources);
+        }
+      } catch (e) {
+        console.error('Error updating bubble:', e);
       }
 
-      loading = false;
-      sendBtn.disabled = false;
-      input.focus();
       saveChat();
     }
 
