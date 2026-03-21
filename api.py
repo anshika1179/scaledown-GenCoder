@@ -135,7 +135,7 @@ def get_quiz(chapter_id):
     chap   = chapters[chapter_id - 1]
     sample = chap["text"][:3500]
 
-    prompt = f"""<|im_start|>system\nYou are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
+    system_prompt = f"""You are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
 
 Based ONLY on the excerpt below, generate exactly 4 multiple-choice questions.
 Return ONLY valid JSON — no markdown, no explanation, just JSON:
@@ -149,18 +149,22 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
       "explanation": "The French Revolution began in 1789 with the storming of the Bastille."
     }}
   ]
-}}<|im_end|>
-<|im_start|>user\nTextbook excerpt:
-{sample}<|im_end|>
-<|im_start|>assistant\n"""
+}}"""
+
+    user_prompt = f"Textbook excerpt:\n{sample}"
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
 
     try:
-        content = _hf_client.text_generation(
-            prompt,
-            max_new_tokens=900,
+        response = _hf_client.chat_completion(
+            messages=messages,
+            max_tokens=900,
             temperature=0.25,
-            do_sample=True,
-        ).strip()
+        )
+        content = response.choices[0].message.content.strip()
 
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)
         if match:

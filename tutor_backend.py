@@ -189,26 +189,28 @@ def generate_answer(question: str, context_chunks: List[Dict]) -> str:
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
     )
 
-    prompt = f"""<|im_start|>system\nYou are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
+    system_prompt = """You are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
 
 INSTRUCTIONS:
 1. Start with a direct 1-2 sentence answer.
 2. Give supporting details (2-4 sentences) with key names, dates, or events.
-3. Do NOT say "not covered" if the context is relevant.<|im_end|>
-<|im_start|>user\nContext from textbook:
-{context}
+3. Do NOT say "not covered" if the context is relevant."""
 
-Student's Question: {question}<|im_end|>
-<|im_start|>assistant\n"""
+    user_prompt = f"Context from textbook:\n{context}\n\nStudent's Question: {question}"
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
 
     try:
-        result = _hf_client.text_generation(
-            prompt,
-            max_new_tokens=350,
+        response = _hf_client.chat_completion(
+            messages=messages,
+            max_tokens=350,
             temperature=0.2,
             top_p=0.85,
-            do_sample=True,
         )
-        return result.strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        return f"Inference Error: {str(e)}. Please try again in a moment."
+        import traceback
+        return f"Inference Error: {str(e)} | Details: {traceback.format_exc()}"
