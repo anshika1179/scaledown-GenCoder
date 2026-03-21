@@ -1,4 +1,3 @@
-&#65279;
 <!DOCTYPE html>
 
 <html lang="en">
@@ -2897,9 +2896,11 @@
       <div class="s-label">Chapters Covered</div>
 
       <div class="ch-list" id="chapterList">
-
-        <div class="ch-pill" style="justify-content:center;color:var(--t3);font-size:0.78rem;">Loading...</div>
-
+        <div class="ch-pill"><span class="ch-num">Ch.1</span><span>The Rise of Nationalism in Europe</span></div>
+        <div class="ch-pill"><span class="ch-num">Ch.2</span><span>Nationalism in India</span></div>
+        <div class="ch-pill"><span class="ch-num">Ch.3</span><span>The Making of a Global World</span></div>
+        <div class="ch-pill"><span class="ch-num">Ch.4</span><span>The Age of Industrialisation</span></div>
+        <div class="ch-pill"><span class="ch-num">Ch.5</span><span>Print Culture and the Modern World</span></div>
       </div>
 
       <div class="sdiv"></div>
@@ -3137,13 +3138,13 @@
       <div class="quiz-launch-btn" onclick="openQuiz()">&#128221; Quiz Me! &nbsp;<span
           style="font-size:.75rem;font-weight:400;color:var(--t3)">Test your knowledge</span></div>
 
-      <!-- Theme + Voice row -->
-
+      <!-- Theme Toggle -->
       <div style="display:flex;gap:.5rem;margin:.5rem 1rem .3rem;">
-
         <button onclick="toggleTheme()" id="themeBtn"
-          style="flex:1;padding:.55rem;background:var(--btn-bg);border:1px solid var(--border2);border-radius:10px;color:var(--t2);font-size:.78rem;cursor:pointer;transition:background .2s;">🌙 Dark Mode</button>
-
+          style="flex:1;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.65rem .8rem;background:linear-gradient(135deg,rgba(124,92,252,.10),rgba(124,92,252,.04));border:1px solid var(--border);border-radius:12px;color:var(--t2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .25s ease;letter-spacing:.3px;"
+          onmouseover="this.style.background='linear-gradient(135deg,rgba(124,92,252,.22),rgba(124,92,252,.10))';this.style.borderColor='rgba(124,92,252,.45)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.18)'"
+          onmouseout="this.style.background='linear-gradient(135deg,rgba(124,92,252,.10),rgba(124,92,252,.04))';this.style.borderColor='';this.style.transform='';this.style.boxShadow=''"
+          >🌙 Dark Mode</button>
       </div>
 
     </aside>
@@ -3396,9 +3397,9 @@
 
     input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); } });
 
-    /* CHAPTERS */
+    /* CHAPTERS — pre-rendered in HTML, API call as enhancement only */
 
-    async function loadChapters() { try { const res = await fetch('/chapters'); const data = await res.json(); chapterList.innerHTML = data.map(ch => `<div class="ch-pill"><span class="ch-num">Ch.${ch.id}</span><span>${ch.title}</span></div>`).join(''); } catch { chapterList.innerHTML = '<div class="ch-pill" style="color:var(--t3);font-size:.78rem;">Could not load chapters</div>'; } }
+    async function loadChapters() { try { const res = await fetch('/chapters'); const data = await res.json(); if (data && data.length) { chapterList.innerHTML = data.map(ch => `<div class="ch-pill"><span class="ch-num">Ch.${ch.id}</span><span>${ch.title}</span></div>`).join(''); } } catch { /* chapters already rendered in HTML, silent fallback */ } }
 
     /* USER BUBBLE */
 
