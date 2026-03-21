@@ -3459,15 +3459,15 @@
       qCount++;
       qCountEl.textContent = qCount;
 
+      // Create a SINGLE bubble that we update in-place (never removed/recreated)
       const g = document.createElement('div');
       g.className = 'msg-group';
-      g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body" id="sb"></div></div></div>`;
+      g.innerHTML = `<div class="msg-row ai"><div class="av av-ai">AI</div><div class="bubble bubble-ai" style="position:relative"><button class="copy-btn" onclick="copyMsg(this)">Copy</button><div class="md-body"></div></div></div>`;
       chatWindow.appendChild(g);
       scrollBot();
 
-      const sb = document.getElementById('sb');
+      const sb = g.querySelector('.md-body');
       let fullText = '', meta = null, receivedAny = false;
-      let completed = false;
 
       try {
         const res = await fetch('/ask/stream?question=' + encodeURIComponent(q));
@@ -3480,7 +3480,6 @@
         while (true) {
           const { value, done } = await reader.read();
           if (done) {
-            // Process remaining buffer
             if (buf) {
               const lines = buf.split('\n');
               for (const line of lines) {
@@ -3519,28 +3518,44 @@
           }
         }
 
-        g.remove();
-        addAI(fullText, meta ? meta.sources : [], meta ? meta.tokens_used : 0, meta ? meta.tokens_saved : 0);
-        completed = true;
-
       } catch (e) {
         console.error(e);
-        if (!completed) {
+        if (!receivedAny) {
           g.remove();
-          if (!receivedAny) {
-            showToast('Could not reach server. Is it running?');
-            qCount--;
-            qCountEl.textContent = qCount;
-          } else {
-            addAI(fullText, meta ? meta.sources : [], 0, 0);
-          }
+          showToast('Could not reach server. Is it running?');
+          qCount--;
+          qCountEl.textContent = qCount;
         }
-      } finally {
-        loading = false;
-        sendBtn.disabled = false;
-        input.focus();
-        saveChat();
       }
+
+      // Update the SAME bubble in-place with final formatting, sources, and follow-ups
+      if (receivedAny && fullText) {
+        const sources = meta ? (meta.sources || []) : [];
+        const tokensUsed = meta ? (meta.tokens_used || 0) : 0;
+        const tokensSaved = meta ? (meta.tokens_saved || 0) : 0;
+
+        sb.innerHTML = fmt(fullText);
+
+        const srcHtml = sources.length ? `<div class="sources"><div class="src-label">Sources</div>${sources.map(s => `<span class="src-tag">${esc(s)}</span>`).join('')}</div>` : '';
+        const fuQs = sources.flatMap(s => {
+          const key = Object.keys(FOLLOWUP_MAP).find(k => s.includes(k));
+          return key ? FOLLOWUP_MAP[key] : [];
+        }).slice(0, 3);
+        const fuHtml = fuQs.length ? `<div class="followup">${fuQs.map(q => `<span class="fu-chip" onclick="ask('${q.replace(/'/g, "\\\\'")}')">${esc(q)}</span>`).join('')}</div>` : '';
+
+        const bubble = g.querySelector('.bubble-ai');
+        if (srcHtml) bubble.insertAdjacentHTML('beforeend', srcHtml);
+        if (fuHtml) bubble.insertAdjacentHTML('beforeend', fuHtml);
+
+        scrollBot();
+        if (tokensUsed) updateMetrics(tokensUsed, tokensSaved);
+        if (sources.length) markChapters(sources);
+      }
+
+      loading = false;
+      sendBtn.disabled = false;
+      input.focus();
+      saveChat();
     }
 
     /* INIT */
