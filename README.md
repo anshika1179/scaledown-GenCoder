@@ -1,12 +1,3 @@
----
-title: NCERT AI Tutor
-emoji: 📚
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-pinned: false
----
-
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 [![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
 
@@ -208,11 +199,11 @@ streamlit run app.py
 ---
 
 ## 👩‍💻 Built For
+**ScaleDown Session 3 Challenge**
 
-**Team name-GenCoder · Session 3**  
+**Team name-GenCoder **  
 Track: *The Education Tutor for Remote India*  
 Required Technique: **Context Pruning**
-
 ---
 
 <div align="center">
