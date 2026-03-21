@@ -1,4 +1,16 @@
+---
+title: NCERT AI Tutor
+emoji: 📚
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
+[![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
+
+**🔴 LIVE DEMO:** [Click here to try the App!](https://anshika1179-scaledown-gencoder.hf.space)
 
 > **GenCoder Challenge · Session 3** | Track: AI/ML · Technique: **Context Pruning**
 
@@ -79,12 +91,14 @@ The **2-Stage Context Pruning** technique directly addresses the high cost and l
 | **Context Tokens** | ~12,000+ (Entire Book) | ~800 - 1,200 | **~90% Reduction** |
 | **Inference Time** | 45s+ (on low-end CPU) | 2s - 5s | **~10x Speedup** |
 | **Local Memory** | High (Context overflow) | Low (< 2GB) | **Rock-solid Stability** |
+| **Cost per Query** | $0.005+ (Cloud API) | **$0.00 (Local Llama 3.2)** | **100% Cost Savings** |
+| **Answer Quality** | Prone to hallucinations | Grounded in exact passages | **High Quality Preservation** |
 
 ---
 
 ## 🎬 Demo Video
 
-![AI Tutor Demo](demo_video.webp)
+![AI Tutor Demo](demo_videos.webp)
 
 ---
 
