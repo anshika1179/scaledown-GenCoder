@@ -1,3 +1,12 @@
+---
+title: Scaledown Gencoder
+emoji: 📚
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 [![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
 
