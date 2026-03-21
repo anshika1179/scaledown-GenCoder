@@ -112,7 +112,6 @@ The **2-Stage Context Pruning** technique directly addresses the high cost and l
 session 3 project/
 ├── tutor_backend.py          # Core RAG + Context Pruning logic
 ├── api.py                    # Flask REST API (GET /chapters, POST /ask)
-├── app.py                    # Streamlit UI (alternative frontend)
 ├── templates/
 │   └── index.html            # Premium HTML/JS chat frontend
 ├── ncert_history_chapters/   # NCERT PDF textbooks (Ch. 1–5)
