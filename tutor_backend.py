@@ -25,7 +25,8 @@ import numpy as np
 
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION — HuggingFace Free Serverless Inference
-# Requires HF_TOKEN set as a secret in HF Space settings
+# Uses provider="hf-inference" to explicitly route to HF's
+# own native inference servers (NOT third-party providers).
 # ─────────────────────────────────────────────────────────────
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 HAS_API_KEY = bool(HF_TOKEN)
@@ -35,11 +36,12 @@ if not HF_TOKEN:
     print("⚠️  WARNING: HF_TOKEN not set! Add it as a secret in your HF Space settings.")
     print("   Get a free token at: https://huggingface.co/settings/tokens")
 
-# Using Zephyr-7B-Beta as it is the official gold standard for Hugging Face's
-# free Serverless Inference API and is guaranteed to be universally supported
-# across all free tier tokens for chat_completion.
-HF_MODEL = "HuggingFaceH4/zephyr-7b-beta"
-_hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN if HF_TOKEN else None)
+# Using Qwen2.5-1.5B-Instruct via HF's own native inference provider
+HF_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+_hf_client = InferenceClient(
+    provider="hf-inference",
+    api_key=HF_TOKEN if HF_TOKEN else None,
+)
 
 # ── Config ────────────────────────────────────────────────────
 CHAPTER_FOLDER = "ncert_history_chapters"
@@ -183,8 +185,7 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
 def generate_answer(question: str, context_chunks: List[Dict]) -> str:
     """
     Generate an accurate, curriculum-aligned answer.
-    First attempts to use Google Gemini API if GEMINI_API_KEY is present,
-    otherwise tries HuggingFace Serverless Inference.
+    Uses HuggingFace native Inference (provider=hf-inference).
     """
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
@@ -199,22 +200,6 @@ INSTRUCTIONS:
 
     user_prompt = f"Context from textbook:\n{context}\n\nStudent's Question: {question}"
 
-    # --- GEMINI FALLBACK (Recommended) ---
-    gemini_key = os.environ.get("GEMINI_API_KEY")
-    if gemini_key:
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=gemini_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(f"{system_prompt}\n\n{user_prompt}")
-            return response.text.replace("*", "").strip()
-        except Exception as e:
-            return f"Gemini API Error: {str(e)}"
-
-    # If no Gemini Key, try Hugging Face (which is heavily restricting free tiers)
-    if not HF_TOKEN:
-        return "⚠️ CRITICAL SETUP REQUIRED: Hugging Face has permanently disabled their free API tier for your account. Please grab a 100% free Google Gemini key from https://aistudio.google.com/app/apikey and add it as a secret named 'GEMINI_API_KEY' in your Space Settings! Then restart the space."
-
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt}
@@ -222,6 +207,7 @@ INSTRUCTIONS:
 
     try:
         response = _hf_client.chat_completion(
+            model=HF_MODEL,
             messages=messages,
             max_tokens=350,
             temperature=0.2,
@@ -229,4 +215,4 @@ INSTRUCTIONS:
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        return "⚠️ Hugging Face API is blocking free tokens from its serverless providers. \nPlease grab a 100% free Google Gemini key from https://aistudio.google.com/app/apikey and add it as a secret named 'GEMINI_API_KEY' in your Space Settings! Then restart the space."
+        return f"Inference Error: {str(e)}"

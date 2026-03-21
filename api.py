@@ -153,34 +153,23 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
 
     user_prompt = f"Textbook excerpt:\n{sample}"
     
-    # --- GEMINI FALLBACK ---
-    content = ""
-    gemini_key = os.environ.get("GEMINI_API_KEY")
-    if gemini_key:
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=gemini_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            gemini_res = model.generate_content(f"{system_prompt}\n\n{user_prompt}")
-            content = gemini_res.text
-        except Exception as e:
-            return jsonify({"error": f"Gemini API Error: {str(e)}"}), 500
+    from tutor_backend import HF_MODEL
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
 
-    else:
-        # Try Hugging Face
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
-        try:
-            response = _hf_client.chat_completion(
-                messages=messages,
-                max_tokens=900,
-                temperature=0.25,
-            )
-            content = response.choices[0].message.content.strip()
-        except Exception:
-            return jsonify({"error": "Hugging Face is currently restricting free tier tokens. Please add a GEMINI_API_KEY to your Space Secrets to enable the fallback module!"}), 500
+    content = ""
+    try:
+        response = _hf_client.chat_completion(
+            model=HF_MODEL,
+            messages=messages,
+            max_tokens=900,
+            temperature=0.25,
+        )
+        content = response.choices[0].message.content.strip()
+    except Exception as e:
+        return jsonify({"error": f"Quiz generation error: {str(e)}"}), 500
 
     try:
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)
