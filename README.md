@@ -1,5 +1,11 @@
 ---
-
+title: NCERT History AI Tutor
+emoji: 📚
+colorFrom: purple
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
 ---
 
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
