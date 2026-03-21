@@ -1,3 +1,13 @@
+---
+title: NCERT History AI Tutor
+emoji: 📚
+colorFrom: purple
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 [![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
 
