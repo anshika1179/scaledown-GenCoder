@@ -1,14 +1,12 @@
-# api.py  — Enhanced Flask API
+# api.py  — Enhanced Flask API (HuggingFace Spaces Edition)
 import json
 import functools
 from flask import Flask, request, jsonify, render_template, Response, stream_with_context
 import os
-from tutor_backend import get_relevant_context, generate_answer, chapters, HAS_API_KEY, model
-import ollama
+from tutor_backend import get_relevant_context, generate_answer, chapters, HAS_API_KEY
 
 app = Flask(__name__)
 
-LLM_MODEL          = "llama3.2:1b"
 BASELINE_TOKENS    = 12000   # naive RAG — sends entire textbook
 CHARS_PER_TOKEN    = 4       # rough estimate
 
@@ -40,7 +38,7 @@ def _build_prompt(question: str, chunks: list) -> str:
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in chunks]
     )
-    return f"""You are an expert CBSE Class 10 History teacher. Answer the student's question \
+    return f"""<s>[INST] You are an expert CBSE Class 10 History teacher. Answer the student's question \
 using ONLY the provided NCERT textbook excerpts.
 
 INSTRUCTIONS:
@@ -55,7 +53,7 @@ Context:
 
 Student's Question: {question}
 
-Answer:"""
+Answer: [/INST]"""
 
 
 # ─────────────────────────────────────────────────────────────
@@ -68,7 +66,7 @@ def index():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "api_mode": "gemini" if HAS_API_KEY else "ollama"})
+    return jsonify({"status": "ok", "api_mode": "huggingface_inference"})
 
 
 @app.route("/chapters", methods=["GET"])
@@ -78,7 +76,7 @@ def get_chapters():
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    """Non-streaming endpoint  (used for chip-click fallback, LRU-cached)."""
+    """Non-streaming endpoint (LRU-cached)."""
     data     = request.get_json()
     question = data.get("question", "").strip()
     if not question:
@@ -89,7 +87,7 @@ def ask():
 
 @app.route("/ask/stream")
 def ask_stream():
-    """Streaming SSE endpoint  — word-by-word delivery like ChatGPT."""
+    """Streaming SSE endpoint — delivers full answer as a single event."""
     question = request.args.get("question", "").strip()
     if not question:
         return jsonify({"error": "No question provided"}), 400
@@ -109,28 +107,14 @@ def ask_stream():
                       + len(question.split()) + 80)
     tokens_saved = max(0, BASELINE_TOKENS - tokens_used)
 
-    prompt = _build_prompt(question, chunks)
-
     def _stream():
         try:
-            if HAS_API_KEY:
-                # Gemini Streaming
-                response = model.generate_content(prompt, stream=True)
-                for chunk in response:
-                    if chunk.text:
-                        yield f"data: {json.dumps({'text': chunk.text})}\n\n"
-            else:
-                # Ollama Streaming
-                for part in ollama.chat(
-                    model=LLM_MODEL,
-                    messages=[{"role": "user", "content": prompt}],
-                    stream=True,
-                    options={"num_predict": 400, "temperature": 0.2, "top_p": 0.85},
-                ):
-                    text = part.get("message", {}).get("content", "")
-                    if text:
-                        yield f"data: {json.dumps({'text': text})}\n\n"
-            
+            answer = generate_answer(question, chunks)
+            # Send word by word for streaming effect
+            words = answer.split(" ")
+            for word in words:
+                yield f"data: {json.dumps({'text': word + ' '})}\n\n"
+
             done_payload = json.dumps({'done': True, 'sources': sources,
                                        'tokens_used': tokens_used, 'tokens_saved': tokens_saved})
             yield f"data: {done_payload}\n\n"
@@ -145,13 +129,16 @@ def ask_stream():
 @app.route("/quiz/<int:chapter_id>")
 def get_quiz(chapter_id):
     """Generate 4 MCQs for the given chapter using the LLM."""
+    from tutor_backend import _hf_client
+    import re
+
     if chapter_id < 1 or chapter_id > len(chapters):
         return jsonify({"error": "Invalid chapter ID"}), 400
 
     chap   = chapters[chapter_id - 1]
     sample = chap["text"][:3500]
 
-    prompt = f"""You are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
+    prompt = f"""<s>[INST] You are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
 
 Based ONLY on the excerpt below, generate exactly 4 multiple-choice questions.
 Return ONLY valid JSON — no markdown, no explanation, just JSON:
@@ -170,31 +157,21 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
 Textbook excerpt:
 {sample}
 
-JSON:"""
+JSON: [/INST]"""
 
     try:
-        if HAS_API_KEY:
-            # Gemini Quiz Generation
-            response = model.generate_content(prompt)
-            content = response.text.strip()
-        else:
-            # Ollama Quiz Generation
-            response = ollama.chat(
-                model=LLM_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                format="json",
-                options={"num_predict": 900, "temperature": 0.25},
-            )
-            content = response["message"]["content"].strip()
-        
-        import re
-        # Find the JSON array part
+        content = _hf_client.text_generation(
+            prompt,
+            max_new_tokens=900,
+            temperature=0.25,
+            do_sample=True,
+        ).strip()
+
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)
         if match:
             quiz = json.loads(match.group(0))
             return jsonify({"chapter": chap["title"], **quiz})
-        
-        # Fallback parsing
+
         start = content.find("{")
         end   = content.rfind("}") + 1
         if start >= 0 and end > start:
@@ -202,13 +179,13 @@ JSON:"""
                 quiz = json.loads(content[start:end])
                 return jsonify({"chapter": chap["title"], **quiz})
             except Exception:
-                pass 
-                
+                pass
+
         return jsonify({"error": "LLM returned unparseable JSON — please try again"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 7860))
     app.run(debug=False, host='0.0.0.0', port=port)

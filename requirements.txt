@@ -1,9 +1,8 @@
 flask
-google-generativeai
+huggingface_hub
 sentence-transformers
 faiss-cpu
 pypdf
 pymupdf
 numpy
 gunicorn
-ollama

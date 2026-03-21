@@ -2,39 +2,37 @@
 """
 TECHNICAL ARCHITECTURE OVERVIEW — 2-STAGE CONTEXT PRUNING
 ---------------------------------------------------------
-This module implements a highly optimized RAG (Retrieval-Augmented Generation) 
+This module implements a highly optimized RAG (Retrieval-Augmented Generation)
 pipeline designed for low-compute environments (Rural India use-case).
 
 TECHNIQUE: 2-Stage Context Pruning
-1. Stage 1 (Chapter-Level): Uses cosine similarity on large chapter embeddings 
+1. Stage 1 (Chapter-Level): Uses cosine similarity on large chapter embeddings
    to eliminate ~60-80% of irrelevant textbooks immediately.
-2. Stage 2 (Chunk-Level): Performs a refined FAISS vector search only within 
+2. Stage 2 (Chunk-Level): Performs a refined FAISS vector search only within
    the selected chapters to find the most relevant 600-char excerpts.
 
-RESULT: Drastically reduces token context from ~12k (entire book) to <1k, 
-enabling fast local inference on 1B models with zero cloud usage.
+RESULT: Drastically reduces token context from ~12k (entire book) to <1k,
+enabling fast inference on HuggingFace free serverless API with zero cost.
 """
 import os
 import json
 from typing import List, Dict
 import fitz
-import google.generativeai as genai
+from huggingface_hub import InferenceClient
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 
 # ─────────────────────────────────────────────────────────────
-# CONFIGURATION
+# CONFIGURATION — HuggingFace Free Serverless Inference
+# (No API key required for basic usage)
 # ─────────────────────────────────────────────────────────────
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-HAS_API_KEY = len(GEMINI_API_KEY) > 10
+HF_TOKEN = os.environ.get("HF_TOKEN", "")   # Optional: add free HF token for higher rate limits
+HAS_API_KEY = False   # Kept for compatibility; HF Inference API handles everything
+model = None
 
-if HAS_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-else:
-    import ollama  # Fallback for local-only testing
-    model = None
+HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+_hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN if HF_TOKEN else None)
 
 # ── Config ────────────────────────────────────────────────────
 CHAPTER_FOLDER = "ncert_history_chapters"
@@ -44,7 +42,6 @@ CHUNK_OVERLAP = 120          # more overlap → fewer gaps between chunks
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 VECTOR_DB_PATH  = "faiss_index_ncert.bin"
 METADATA_PATH   = "metadata_ncert.json"
-LLM_MODEL = "llama3.2:1b"
 
 # ── Load embedding model ONCE at startup ─────────────────────
 print("Loading embedding model...")
@@ -65,10 +62,6 @@ def extract_chapters():
         path = os.path.join(CHAPTER_FOLDER, pdf_name)
         if not os.path.exists(path):
             continue
-        # Note: The original code used 'fitz'. If 'pypdf' is intended to replace it,
-        # the following lines would need to be updated to use pypdf's API.
-        # For now, keeping 'fitz' as the instruction did not specify changing this function's logic.
-        import fitz # Re-import fitz locally if pypdf is meant for other uses
         doc = fitz.open(path)
         text = ""
         for page in doc:
@@ -136,7 +129,7 @@ _faiss_index = faiss.read_index(VECTOR_DB_PATH)
 with open(METADATA_PATH, "r", encoding="utf-8") as f:
     _metadata = json.load(f)["chunks_metadata"]
 
-# FIX 1: Cache chapter embeddings at startup (not re-computed per query)
+# Cache chapter embeddings at startup (not re-computed per query)
 print("Pre-computing chapter embeddings...")
 _chap_previews = [f"{c['title']}: {c['text'][:500]}" for c in chapters]
 _chap_embs     = _embed_model.encode(_chap_previews, normalize_embeddings=True).astype("float32")
@@ -147,21 +140,17 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
     """
     2-stage context pruning:
       Stage 1 — pick top_k_chapters most relevant chapters via cosine similarity
-      Stage 2 — FAISS search with larger k, keep only chunks from selected chapters
-
-    FIX 2: k=60 instead of k=20 → much less chance of zero-intersection
-    FIX 3: top_k_chunks=5 for richer context
+      Stage 2 — FAISS search with larger k=60, keep only chunks from selected chapters
     """
-    # Embed & normalize the query
     q_emb = _embed_model.encode(question, normalize_embeddings=True).astype("float32")
 
     # Stage 1 – chapter-level pruning (uses cached embeddings)
-    scores  = np.dot(_chap_embs, q_emb)          # already normalized → cosine scores
+    scores  = np.dot(_chap_embs, q_emb)
     top_idx = np.argsort(scores)[-top_k_chapters:][::-1].tolist()
 
-    # Stage 2 – chunk-level FAISS search (larger k for safety)
+    # Stage 2 – chunk-level FAISS search (k=60 for safety)
     q_emb_faiss = q_emb.reshape(1, -1)
-    D, I = _faiss_index.search(q_emb_faiss, k=60)   # was 20 — now 60
+    D, I = _faiss_index.search(q_emb_faiss, k=60)
 
     relevant = []
     for dist, idx in zip(D[0], I[0]):
@@ -187,50 +176,35 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
 def generate_answer(question: str, context_chunks: List[Dict]) -> str:
     """
     Generate an accurate, curriculum-aligned answer.
-    Uses Gemini API if available (Cloud), otherwise falls back to Ollama (Local).
+    Uses HuggingFace free serverless Inference API (Mistral-7B-Instruct).
+    No API key required for basic usage.
     """
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
     )
 
-    prompt = f"""You are an expert CBSE Class 10 History teacher. The student is asking a question \
-from the NCERT textbook "India and the Contemporary World – II" (Chapters 1–5).
+    prompt = f"""<s>[INST] You are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
 
 INSTRUCTIONS:
-1. Read ALL the provided context carefully — it contains relevant text from the textbook.
-2. Write a clear, accurate answer using the context. DO NOT ignore information that is present.
-3. Structure your answer well:
-   - Start with a direct 1–2 sentence answer to the question.
-   - Then give supporting details from the context (2–4 sentences).
-   - If relevant, mention key names, dates, or events found in the context.
-4. Do NOT say "the textbook does not cover this" if the context has relevant information.
-5. Only say "not covered in detail" if the context is genuinely unrelated to the question.
+1. Start with a direct 1-2 sentence answer.
+2. Give supporting details (2-4 sentences) with key names, dates, or events.
+3. Do NOT say "not covered" if the context is relevant.
 
 Context from textbook:
 {context}
 
 Student's Question: {question}
 
-Answer (write clearly and completely):"""
+Answer: [/INST]"""
 
-    if HAS_API_KEY:
-        try:
-            response = model.generate_content(prompt)
-            return response.text.strip()
-        except Exception as e:
-            return f"Gemini API Error: {str(e)}"
-    else:
-        # Fallback to local Ollama
-        try:
-            response = ollama.chat(
-                model=LLM_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                options={
-                    "num_predict": 350,   
-                    "temperature": 0.2,   
-                    "top_p": 0.85,
-                }
-            )
-            return response['message']['content'].strip()
-        except Exception as e:
-            return f"Local Inference Error: {str(e)}. (Hint: Check if api.py and Ollama are running)"
+    try:
+        result = _hf_client.text_generation(
+            prompt,
+            max_new_tokens=350,
+            temperature=0.2,
+            top_p=0.85,
+            do_sample=True,
+        )
+        return result.strip()
+    except Exception as e:
+        return f"Inference Error: {str(e)}. Please try again in a moment."

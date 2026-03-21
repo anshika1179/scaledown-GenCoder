@@ -1,33 +1,25 @@
-# Use official Ollama image which has Ollama perfectly installed
-FROM ollama/ollama
+# Use a lightweight Python image — no Ollama needed
+FROM python:3.10-slim
 
-# Install python and pip
-RUN apt-get update && apt-get install -y python3 python3-pip curl && rm -rf /var/lib/apt/lists/*
+# Install system deps for PyMuPDF and FAISS
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libglib2.0-0 \
+    libsm6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy your entire existing project folder into the Hugging Face container
+# Copy project files
 COPY . /app
 
-# Install your Python packages (including the new ollama package from requirements)
-RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Create a startup script that runs Python and Ollama at the same time!
-RUN echo '#!/bin/bash\n\
-    # Start the Ollama server in the background\n\
-    ollama serve &\n\
-    sleep 5\n\
-    # Pull the specific Llama model down\n\
-    ollama pull llama3.2:1b\n\
-    # Boot your Flask API!\n\
-    gunicorn -b 0.0.0.0:7860 api:app\n\
-    ' > /app/start.sh
-
-RUN chmod +x /app/start.sh
-
+# Expose port 7860 (required by Hugging Face Spaces)
 EXPOSE 7860
-# Override the default ollama entrypoint
-ENTRYPOINT []
-# Execute
-CMD ["/bin/bash", "/app/start.sh"]
+
+# Launch the Flask app via gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:7860", "--timeout", "120", "--workers", "1", "api:app"]

@@ -135,42 +135,27 @@ This project is fully containerized and currently deployed on **Hugging Face Spa
 
 | Component | Technology |
 |---|---|
-| **LLM (Local Primary)** | Llama 3.2 (1B) via [Ollama](https://ollama.com) |
-| **LLM (Cloud Fallback)** | Google Gemini Pro (`google-generativeai`) |
+| **LLM (Inference)** | [Mistral-7B-Instruct-v0.2](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2) via HuggingFace free Inference API |
 | **Embeddings** | `sentence-transformers` · `all-MiniLM-L6-v2` |
 | **Vector Search** | `faiss-cpu` |
 | **PDF Parsing** | `PyMuPDF (fitz)` & `pypdf` |
 | **Backend API** | `Flask` & `numpy` |
 | **Production Server** | `gunicorn` |
-| **Alt Frontend** | `Streamlit` |
 | **Frontend UI** | Vanilla HTML · CSS (Glassmorphism) · JavaScript |
 
 ### Install Dependencies
 
 ```bash
-pip install flask streamlit sentence-transformers faiss-cpu pymupdf pypdf numpy ollama google-generativeai gunicorn
-```
-
-### Install & Pull LLM
-
-```bash
-# Install Ollama: https://ollama.com/download
-ollama pull llama3.2:1b
+pip install flask huggingface_hub sentence-transformers faiss-cpu pymupdf pypdf numpy gunicorn
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Local)
 
-### Option 1 — Web UI (Flask + HTML)
 ```bash
 python api.py
-# Open http://localhost:5000
-```
-
-### Option 2 — Streamlit UI
-```bash
-streamlit run app.py
+# Open http://localhost:7860
 ```
 
 > **First run** takes ~30–60 seconds to build the FAISS index from PDFs.  
@@ -192,12 +177,12 @@ streamlit run app.py
 
 ## ✨ Key Features
 
-- 🔪 **2-Stage Context Pruning** — Drastically reduces token context for fast local inference
+- 🔪 **2-Stage Context Pruning** — Drastically reduces token context by ~90%, enabling fast inference
 - 📝 **Interactive Quiz Mode** — Automatically generates challenging MCQs for any chapter using strict JSON parsing
-- 💾 **Offline-first** — FAISS index pre-built, no re-processing per query
-- 🤖 **Local LLM** — Llama 3.2 (1B) via Ollama, zero cloud API cost
-- 🎨 **Premium UI & Theming** — Dark-themed, glassmorphism design with accessibility in mind (improved contrast variables)
-- 🔤 **Robust Text Processing** — Advanced encoding resolution scripts ensure stable UTF-8 English text rendering, eliminating garbled characters from messy PDF sources
+- 💾 **Pre-built FAISS Index** — Built once at startup, loaded instantly on every subsequent run
+- 🤖 **Free LLM Inference** — Powered by Mistral-7B via HuggingFace's free serverless API — zero cost, no API key required
+- 🎨 **Premium UI & Theming** — Dark-themed, glassmorphism design with improved contrast and accessibility
+- 🔤 **Robust Text Processing** — Advanced encoding resolution ensures stable UTF-8 rendering, eliminating garbled characters from PDF sources
 - 📖 **Source Citation** — Every answer shows exactly which chapter it came from
 - 📱 **Mobile-responsive** — Works on low-end devices and small screens
 
@@ -212,5 +197,5 @@ Required Technique: **Context Pruning**
 ---
 
 <div align="center">
-  <sub>Built with ❤️ using Ollama · FAISS · SentenceTransformers · Flask</sub>
+  <sub>Built with ❤️ using HuggingFace · FAISS · SentenceTransformers · Flask</sub>
 </div>
