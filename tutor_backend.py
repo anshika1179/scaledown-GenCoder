@@ -35,8 +35,10 @@ if not HF_TOKEN:
     print("⚠️  WARNING: HF_TOKEN not set! Add it as a secret in your HF Space settings.")
     print("   Get a free token at: https://huggingface.co/settings/tokens")
 
-# Using Qwen2.5-1.5B-Instruct because it's fast and natively supports chat_completion
-HF_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+# Using Zephyr-7B-Beta as it is the official gold standard for Hugging Face's
+# free Serverless Inference API and is guaranteed to be universally supported
+# across all free tier tokens for chat_completion.
+HF_MODEL = "HuggingFaceH4/zephyr-7b-beta"
 _hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN if HF_TOKEN else None)
 
 # ── Config ────────────────────────────────────────────────────
