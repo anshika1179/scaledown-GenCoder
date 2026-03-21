@@ -3467,6 +3467,7 @@
 
       const sb = document.getElementById('sb');
       let fullText = '', meta = null, receivedAny = false;
+      let completed = false;
 
       try {
         const res = await fetch('/ask/stream?question=' + encodeURIComponent(q));
@@ -3520,23 +3521,25 @@
 
         g.remove();
         addAI(fullText, meta ? meta.sources : [], meta ? meta.tokens_used : 0, meta ? meta.tokens_saved : 0);
+        completed = true;
 
       } catch (e) {
         console.error(e);
-        g.remove();
-        if (!receivedAny) {
-          showToast('Could not reach server. Is it running?');
-          qCount--; // Only decrement if we got absolutely nothing
-          qCountEl.textContent = qCount;
-        } else {
-          // Even if it failed midway, keep the count as the user saw partial response
-          addAI(fullText + "\n\n[Connection lost...]", meta ? meta.sources : [], 0, 0);
+        if (!completed) {
+          g.remove();
+          if (!receivedAny) {
+            showToast('Could not reach server. Is it running?');
+            qCount--;
+            qCountEl.textContent = qCount;
+          } else {
+            addAI(fullText, meta ? meta.sources : [], 0, 0);
+          }
         }
       } finally {
         loading = false;
         sendBtn.disabled = false;
         input.focus();
-        saveChat(); // Persistent save
+        saveChat();
       }
     }
 
