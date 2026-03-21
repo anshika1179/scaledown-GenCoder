@@ -25,13 +25,17 @@ import numpy as np
 
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION — HuggingFace Free Serverless Inference
-# (No API key required for basic usage)
+# Requires HF_TOKEN set as a secret in HF Space settings
 # ─────────────────────────────────────────────────────────────
-HF_TOKEN = os.environ.get("HF_TOKEN", "")   # Optional: add free HF token for higher rate limits
-HAS_API_KEY = False   # Kept for compatibility; HF Inference API handles everything
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
+HAS_API_KEY = bool(HF_TOKEN)
 model = None
 
-HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+if not HF_TOKEN:
+    print("⚠️  WARNING: HF_TOKEN not set! Add it as a secret in your HF Space settings.")
+    print("   Get a free token at: https://huggingface.co/settings/tokens")
+
+HF_MODEL = "HuggingFaceH4/zephyr-7b-beta"
 _hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN if HF_TOKEN else None)
 
 # ── Config ────────────────────────────────────────────────────
@@ -176,26 +180,27 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
 def generate_answer(question: str, context_chunks: List[Dict]) -> str:
     """
     Generate an accurate, curriculum-aligned answer.
-    Uses HuggingFace free serverless Inference API (Mistral-7B-Instruct).
-    No API key required for basic usage.
+    Uses HuggingFace serverless Inference API (Zephyr-7B-Beta).
+    Requires HF_TOKEN set in Space secrets.
     """
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
     )
 
-    prompt = f"""<s>[INST] You are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
+    prompt = f"""<|system|>
+You are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
 
 INSTRUCTIONS:
 1. Start with a direct 1-2 sentence answer.
 2. Give supporting details (2-4 sentences) with key names, dates, or events.
-3. Do NOT say "not covered" if the context is relevant.
-
+3. Do NOT say "not covered" if the context is relevant.</s>
+<|user|>
 Context from textbook:
 {context}
 
-Student's Question: {question}
-
-Answer: [/INST]"""
+Student's Question: {question}</s>
+<|assistant|>
+"""
 
     try:
         result = _hf_client.text_generation(

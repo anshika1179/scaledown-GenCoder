@@ -38,22 +38,22 @@ def _build_prompt(question: str, chunks: list) -> str:
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in chunks]
     )
-    return f"""<s>[INST] You are an expert CBSE Class 10 History teacher. Answer the student's question \
-using ONLY the provided NCERT textbook excerpts.
+    return f"""<|system|>
+You are an expert CBSE Class 10 History teacher. Answer the student's question using ONLY the provided NCERT textbook excerpts.
 
 INSTRUCTIONS:
 1. Read ALL context carefully — it contains the answer.
 2. Start with a direct 1-2 sentence answer.
 3. Give supporting details, key names, dates, or events (3-4 sentences).
 4. Format with bullet points where listing multiple items.
-5. Do NOT say "not covered" if the context is clearly relevant.
-
+5. Do NOT say "not covered" if the context is clearly relevant.</s>
+<|user|>
 Context:
 {context}
 
-Student's Question: {question}
-
-Answer: [/INST]"""
+Student's Question: {question}</s>
+<|assistant|>
+"""
 
 
 # ─────────────────────────────────────────────────────────────
@@ -138,7 +138,8 @@ def get_quiz(chapter_id):
     chap   = chapters[chapter_id - 1]
     sample = chap["text"][:3500]
 
-    prompt = f"""<s>[INST] You are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
+    prompt = f"""<|system|>
+You are a CBSE Class 10 History teacher creating a quiz on "{chap['title']}".
 
 Based ONLY on the excerpt below, generate exactly 4 multiple-choice questions.
 Return ONLY valid JSON — no markdown, no explanation, just JSON:
@@ -152,12 +153,12 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
       "explanation": "The French Revolution began in 1789 with the storming of the Bastille."
     }}
   ]
-}}
-
+}}</s>
+<|user|>
 Textbook excerpt:
-{sample}
-
-JSON: [/INST]"""
+{sample}</s>
+<|assistant|>
+"""
 
     try:
         content = _hf_client.text_generation(
