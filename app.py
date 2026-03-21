@@ -412,6 +412,6 @@ if prompt := st.chat_input("Ask any question from Class 10 History..."):
 # ── Footer ───────────────────────────────────────────────────
 st.markdown("""
 <div class="footer">
-    Built with Streamlit · Powered by Ollama & FAISS · NCERT History (Class 10)
+    Built with Streamlit · Powered by HuggingFace Free Inference & FAISS · NCERT History (Class 10)
 </div>
 """, unsafe_allow_html=True)

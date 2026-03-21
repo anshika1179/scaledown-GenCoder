@@ -1,18 +1,8 @@
----
-title: NCERT History AI Tutor
-emoji: 📚
-colorFrom: purple
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 [![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
 
 **🔴 LIVE DEMO:** [Click here to try the App!](https://anshika1179-scaledown-gencoder.hf.space)  
-*(Note: As this is hosted on a free Hugging Face Space, it may take a minute to wake up from sleep mode or return a 503 error during heavy load. Local execution is recommended for the best experience.)*
+*(Note: Hosted on a free Hugging Face Space. It may take a minute to wake up from sleep mode, or return transient errors during heavy load if Hugging Face Inference Providers are busy.)*
 
 > **GenCoder Challenge · Session 3** | Track: AI/ML · Technique: **Context Pruning**
 
@@ -52,7 +42,7 @@ Build an intelligent tutoring system capable of:
 
 ### How It Works
 
-The system uses a **2-Stage Context Pruning** pipeline to drastically reduce the number of tokens sent to the LLM per query, enabling fast local inference:
+The system uses a **2-Stage Context Pruning** pipeline to drastically reduce the number of tokens sent to the LLM per query, drastically reducing API costs and latency:
 
 #### 🔵 Offline Phase (One-Time Setup)
 
@@ -94,7 +84,7 @@ The **2-Stage Context Pruning** technique directly addresses the high cost and l
 |---|---|---|---|
 | **Context Tokens** | ~12,000+ (Entire Book) | ~800 - 1,200 | **~90% Reduction** |
 | **Inference Time** | 45s+ (on low-end CPU) | 2s - 5s | **~10x Speedup** |
-| **Local Memory** | High (Context overflow) | Low (< 2GB) | **Rock-solid Stability** |
+| **Memory Profile** | High (Context overflow) | Low (< 2GB) | **Rock-solid Stability** |
 | **Cost per Query** | $0.005+ (Cloud API) | **$0.00 (HF Free Tier)** | **100% Cost Savings** |
 | **Answer Quality** | Prone to hallucinations | Grounded in exact passages | **High Quality Preservation** |
 
