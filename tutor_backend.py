@@ -35,7 +35,9 @@ if not HF_TOKEN:
     print("⚠️  WARNING: HF_TOKEN not set! Add it as a secret in your HF Space settings.")
     print("   Get a free token at: https://huggingface.co/settings/tokens")
 
-HF_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+# Using SmolLM2 because it's HuggingFace's own in-house model. 
+# This guarantees it runs on HF hardware and avoids third-party API restrictions!
+HF_MODEL = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 _hf_client = InferenceClient(model=HF_MODEL, token=HF_TOKEN if HF_TOKEN else None)
 
 # ── Config ────────────────────────────────────────────────────
