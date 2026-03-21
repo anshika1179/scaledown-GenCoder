@@ -209,7 +209,7 @@ streamlit run app.py
 
 ## 👩‍💻 Built For
 
-**GenCoder Challenge · Session 3**  
+**Team name-GenCoder · Session 3**  
 Track: *The Education Tutor for Remote India*  
 Required Technique: **Context Pruning**
 
