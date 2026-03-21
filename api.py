@@ -153,19 +153,36 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
 
     user_prompt = f"Textbook excerpt:\n{sample}"
     
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+    # --- GEMINI FALLBACK ---
+    content = ""
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+    if gemini_key:
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=gemini_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            gemini_res = model.generate_content(f"{system_prompt}\n\n{user_prompt}")
+            content = gemini_res.text
+        except Exception as e:
+            return jsonify({"error": f"Gemini API Error: {str(e)}"}), 500
+
+    else:
+        # Try Hugging Face
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        try:
+            response = _hf_client.chat_completion(
+                messages=messages,
+                max_tokens=900,
+                temperature=0.25,
+            )
+            content = response.choices[0].message.content.strip()
+        except Exception:
+            return jsonify({"error": "Hugging Face is currently restricting free tier tokens. Please add a GEMINI_API_KEY to your Space Secrets to enable the fallback module!"}), 500
 
     try:
-        response = _hf_client.chat_completion(
-            messages=messages,
-            max_tokens=900,
-            temperature=0.25,
-        )
-        content = response.choices[0].message.content.strip()
-
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)
         if match:
             quiz = json.loads(match.group(0))
@@ -174,15 +191,13 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
         start = content.find("{")
         end   = content.rfind("}") + 1
         if start >= 0 and end > start:
-            try:
-                quiz = json.loads(content[start:end])
-                return jsonify({"chapter": chap["title"], **quiz})
-            except Exception:
-                pass
+            quiz = json.loads(content[start:end])
+            return jsonify({"chapter": chap["title"], **quiz})
+            
+    except Exception:
+        pass
 
-        return jsonify({"error": "LLM returned unparseable JSON — please try again"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"error": "LLM returned unparseable JSON — please try again"}), 500
 
 
 if __name__ == "__main__":

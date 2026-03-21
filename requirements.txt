@@ -6,3 +6,4 @@ pypdf
 pymupdf
 numpy
 gunicorn
+google-generativeai

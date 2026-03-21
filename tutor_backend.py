@@ -183,8 +183,8 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
 def generate_answer(question: str, context_chunks: List[Dict]) -> str:
     """
     Generate an accurate, curriculum-aligned answer.
-    Uses HuggingFace serverless Inference API (Zephyr-7B-Beta).
-    Requires HF_TOKEN set in Space secrets.
+    First attempts to use Google Gemini API if GEMINI_API_KEY is present,
+    otherwise tries HuggingFace Serverless Inference.
     """
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
@@ -198,6 +198,22 @@ INSTRUCTIONS:
 3. Do NOT say "not covered" if the context is relevant."""
 
     user_prompt = f"Context from textbook:\n{context}\n\nStudent's Question: {question}"
+
+    # --- GEMINI FALLBACK (Recommended) ---
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+    if gemini_key:
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=gemini_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(f"{system_prompt}\n\n{user_prompt}")
+            return response.text.replace("*", "").strip()
+        except Exception as e:
+            return f"Gemini API Error: {str(e)}"
+
+    # If no Gemini Key, try Hugging Face (which is heavily restricting free tiers)
+    if not HF_TOKEN:
+        return "⚠️ CRITICAL SETUP REQUIRED: Hugging Face has permanently disabled their free API tier for your account. Please grab a 100% free Google Gemini key from https://aistudio.google.com/app/apikey and add it as a secret named 'GEMINI_API_KEY' in your Space Settings! Then restart the space."
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -213,5 +229,4 @@ INSTRUCTIONS:
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        import traceback
-        return f"Inference Error: {str(e)} | Details: {traceback.format_exc()}"
+        return "⚠️ Hugging Face API is blocking free tokens from its serverless providers. \nPlease grab a 100% free Google Gemini key from https://aistudio.google.com/app/apikey and add it as a secret named 'GEMINI_API_KEY' in your Space Settings! Then restart the space."
