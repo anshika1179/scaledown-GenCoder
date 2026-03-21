@@ -1,7 +1,8 @@
 # 📚 NCERT History AI Tutor — Education Tutor for Remote India
 [![Space](https://img.shields.io/badge/Status-Deployed_on_Hugging_Face-blue?style=for-the-badge&logo=huggingface)](https://anshika1179-scaledown-gencoder.hf.space)
 
-**🔴 LIVE DEMO:** [Click here to try the App!](https://anshika1179-scaledown-gencoder.hf.space)
+**🔴 LIVE DEMO:** [Click here to try the App!](https://anshika1179-scaledown-gencoder.hf.space)  
+*(Note: As this is hosted on a free Hugging Face Space, it may take a minute to wake up from sleep mode or return a 503 error during heavy load. Local execution is recommended for the best experience.)*
 
 > **GenCoder Challenge · Session 3** | Track: AI/ML · Technique: **Context Pruning**
 
@@ -135,18 +136,20 @@ This project is configured for one-click deployment to **Render** or **Railway**
 
 | Component | Technology |
 |---|---|
-| **LLM** | Llama 3.2 (1B) via [Ollama](https://ollama.com) |
+| **LLM (Local Primary)** | Llama 3.2 (1B) via [Ollama](https://ollama.com) |
+| **LLM (Cloud Fallback)** | Google Gemini Pro (`google-generativeai`) |
 | **Embeddings** | `sentence-transformers` · `all-MiniLM-L6-v2` |
 | **Vector Search** | `faiss-cpu` |
-| **PDF Parsing** | `PyMuPDF (fitz)` |
-| **Backend API** | `Flask` |
+| **PDF Parsing** | `PyMuPDF (fitz)` & `pypdf` |
+| **Backend API** | `Flask` & `numpy` |
+| **Production Server** | `gunicorn` |
 | **Alt Frontend** | `Streamlit` |
-| **Frontend** | Vanilla HTML · CSS · JavaScript |
+| **Frontend UI** | Vanilla HTML · CSS (Glassmorphism) · JavaScript |
 
 ### Install Dependencies
 
 ```bash
-pip install flask streamlit sentence-transformers faiss-cpu pymupdf numpy ollama
+pip install flask streamlit sentence-transformers faiss-cpu pymupdf pypdf numpy ollama google-generativeai gunicorn
 ```
 
 ### Install & Pull LLM
