@@ -153,23 +153,32 @@ Return ONLY valid JSON — no markdown, no explanation, just JSON:
 
     user_prompt = f"Textbook excerpt:\n{sample}"
     
-    from tutor_backend import HF_MODEL
+    from tutor_backend import _INFERENCE_CONFIGS, HF_TOKEN
+    from huggingface_hub import InferenceClient as IC
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt}
     ]
 
     content = ""
-    try:
-        response = _hf_client.chat_completion(
-            model=HF_MODEL,
-            messages=messages,
-            max_tokens=900,
-            temperature=0.25,
-        )
-        content = response.choices[0].message.content.strip()
-    except Exception as e:
-        return jsonify({"error": f"Quiz generation error: {str(e)}"}), 500
+    last_error = ""
+    for model_id, provider in _INFERENCE_CONFIGS:
+        try:
+            client = IC(provider=provider, api_key=HF_TOKEN if HF_TOKEN else None)
+            response = client.chat_completion(
+                model=model_id,
+                messages=messages,
+                max_tokens=900,
+                temperature=0.25,
+            )
+            content = response.choices[0].message.content.strip()
+            break
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    if not content:
+        return jsonify({"error": f"Quiz generation error: {last_error}"}), 500
 
     try:
         match = re.search(r'\{.*"questions"\s*:\s*\[.*\].*\}', content, re.DOTALL)

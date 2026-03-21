@@ -24,9 +24,9 @@ import faiss
 import numpy as np
 
 # ─────────────────────────────────────────────────────────────
-# CONFIGURATION — HuggingFace Free Serverless Inference
-# Uses provider="hf-inference" to explicitly route to HF's
-# own native inference servers (NOT third-party providers).
+# CONFIGURATION — HuggingFace Inference Providers
+# Uses the HF Router with provider="novita" which supports
+# Qwen models for free chat completion via HF tokens.
 # ─────────────────────────────────────────────────────────────
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 HAS_API_KEY = bool(HF_TOKEN)
@@ -36,10 +36,18 @@ if not HF_TOKEN:
     print("⚠️  WARNING: HF_TOKEN not set! Add it as a secret in your HF Space settings.")
     print("   Get a free token at: https://huggingface.co/settings/tokens")
 
-# Using Qwen2.5-1.5B-Instruct via HF's own native inference provider
-HF_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+# Model + Provider combos to try (in order of preference)
+# Each is a (model_id, provider) tuple
+_INFERENCE_CONFIGS = [
+    ("Qwen/Qwen2.5-Coder-32B-Instruct", "novita"),
+    ("Qwen/Qwen2.5-72B-Instruct", "novita"),
+    ("deepseek-ai/DeepSeek-R1", "sambanova"),
+    ("meta-llama/Meta-Llama-3-8B-Instruct", "novita"),
+]
+HF_MODEL = _INFERENCE_CONFIGS[0][0]
+HF_PROVIDER = _INFERENCE_CONFIGS[0][1]
 _hf_client = InferenceClient(
-    provider="hf-inference",
+    provider=HF_PROVIDER,
     api_key=HF_TOKEN if HF_TOKEN else None,
 )
 
@@ -185,7 +193,7 @@ def get_relevant_context(question: str, top_k_chapters: int = 2, top_k_chunks: i
 def generate_answer(question: str, context_chunks: List[Dict]) -> str:
     """
     Generate an accurate, curriculum-aligned answer.
-    Uses HuggingFace native Inference (provider=hf-inference).
+    Tries multiple HuggingFace Inference Providers until one succeeds.
     """
     context = "\n\n---\n".join(
         [f"[Source: {c['chapter_title']}]\n{c['text'][:600]}" for c in context_chunks]
@@ -205,14 +213,24 @@ INSTRUCTIONS:
         {"role": "user", "content": user_prompt}
     ]
 
-    try:
-        response = _hf_client.chat_completion(
-            model=HF_MODEL,
-            messages=messages,
-            max_tokens=350,
-            temperature=0.2,
-            top_p=0.85,
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"Inference Error: {str(e)}"
+    last_error = ""
+    for model_id, provider in _INFERENCE_CONFIGS:
+        try:
+            client = InferenceClient(
+                provider=provider,
+                api_key=HF_TOKEN if HF_TOKEN else None,
+            )
+            response = client.chat_completion(
+                model=model_id,
+                messages=messages,
+                max_tokens=350,
+                temperature=0.2,
+                top_p=0.85,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            last_error = str(e)
+            print(f"⚠️ Provider {provider}/{model_id} failed: {last_error}")
+            continue
+
+    return f"All inference providers failed. Last error: {last_error}"
