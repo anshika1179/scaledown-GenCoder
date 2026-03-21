@@ -118,17 +118,16 @@ session 3 project/
 
 ---
 
-## 🚀 Deployment (Cloud Ready)
+## 🚀 Deployment (Hugging Face Spaces)
 
-This project is configured for one-click deployment to **Render** or **Railway**.
+This project is fully containerized and currently deployed on **Hugging Face Spaces** using Docker.
 
-### Steps to Host:
-1.  **Fork/Push** this repository to your GitHub.
-2.  Create a new **Web Service** on [Render.com](https://render.com/).
-3.  Connect this repository.
-4.  **Important**: In the Render "Environment" settings, add:
-    -   `GEMINI_API_KEY`: Your free key from [Google AI Studio](https://aistudio.google.com/).
-5.  Render will automatically use the `Procfile` and `requirements.txt` to build and launch your site!
+### Steps to Host your own copy:
+1.  Create a new **Docker Space** on [Hugging Face](https://huggingface.co/spaces).
+2.  Connect your GitHub repository to the Space (or upload the files directly).
+3.  **Important**: In the Space Settings > Variables and Secrets, add:
+    -   `GEMINI_API_KEY`: Your free key from Google AI Studio (used as the cloud fallback LLM).
+4.  Hugging Face will automatically use the provided `Dockerfile` to build the environment, download the FAISS index, and launch the `gunicorn` server!
 
 ---
 
